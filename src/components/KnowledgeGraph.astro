@@ -1,0 +1,225 @@
+---
+// Renders the Knowledge Map as a real force-directed graph: one hub node per
+// category, one leaf node per article, edges connecting article -> category.
+// Layout + interaction (drag, click-to-navigate) run client-side in vanilla
+// JS/SVG below - no charting library, so nothing to fail a blind CI build.
+interface Post {
+  id: string;
+  data: { title: string; category: string };
+}
+interface Props {
+  posts: Post[];
+}
+const { posts } = Astro.props;
+
+const categoryLabels: Record<string, string> = {
+  physics: 'Physics',
+  computation: 'Computation',
+  experiments: 'Experiments',
+  journeys: 'Journeys',
+  books: 'Books & Films',
+};
+
+const categoriesUsed = [...new Set(posts.map((p) => p.data.category))];
+
+const nodes = [
+  ...categoriesUsed.map((c) => ({
+    id: `cat:${c}`,
+    label: categoryLabels[c] ?? c,
+    hub: true,
+    href: null as string | null,
+  })),
+  ...posts.map((p) => ({
+    id: p.id,
+    label: p.data.title,
+    hub: false,
+    href: `/writings/${p.id}/`,
+  })),
+];
+
+const edges = posts.map((p) => ({ source: p.id, target: `cat:${p.data.category}` }));
+
+const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
+---
+<div class="map" id="knowledge-map">
+  <svg id="kg-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge map — click a node to open that entry"></svg>
+  <p class="kg-hint">Drag to explore, click a node to open it.</p>
+</div>
+<script type="application/json" id="kg-data" set:html={graphJson} />
+
+<script>
+  const dataEl = document.getElementById('kg-data');
+  const svg = document.getElementById('kg-svg') as unknown as SVGSVGElement | null;
+  if (dataEl && svg) {
+    const { nodes, edges } = JSON.parse(dataEl.textContent || '{}') as {
+      nodes: { id: string; label: string; hub: boolean; href: string | null }[];
+      edges: { source: string; target: string }[];
+    };
+
+    type SimNode = (typeof nodes)[number] & {
+      x: number; y: number; vx: number; vy: number; r: number; fixed?: boolean;
+    };
+
+    const W = 900, H = 420;
+    const simNodes = nodes as SimNode[];
+
+    simNodes.forEach((n, i) => {
+      const angle = (i / simNodes.length) * Math.PI * 2;
+      const radius = n.hub ? 70 : 160;
+      n.x = W / 2 + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
+      n.y = H / 2 + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
+      n.vx = 0;
+      n.vy = 0;
+      n.r = n.hub ? 11 : 6;
+    });
+
+    const byId = Object.fromEntries(simNodes.map((n) => [n.id, n]));
+    const links = edges
+      .map((e) => ({ source: byId[e.source], target: byId[e.target] }))
+      .filter((l) => l.source && l.target);
+
+    function tick() {
+      for (let i = 0; i < simNodes.length; i++) {
+        for (let j = i + 1; j < simNodes.length; j++) {
+          const a = simNodes[i], b = simNodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const distSq = dx * dx + dy * dy || 0.01;
+          const dist = Math.sqrt(distSq);
+          if (dist < 220) {
+            const force = 900 / distSq;
+            const fx = (dx / dist) * force, fy = (dy / dist) * force;
+            if (!a.fixed) { a.vx += fx; a.vy += fy; }
+            if (!b.fixed) { b.vx -= fx; b.vy -= fy; }
+          }
+        }
+      }
+      links.forEach((l) => {
+        const dx = l.target.x - l.source.x, dy = l.target.y - l.source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        const force = (dist - 90) * 0.02;
+        const fx = (dx / dist) * force, fy = (dy / dist) * force;
+        if (!l.source.fixed) { l.source.vx += fx; l.source.vy += fy; }
+        if (!l.target.fixed) { l.target.vx -= fx; l.target.vy -= fy; }
+      });
+      simNodes.forEach((n) => {
+        if (n.fixed) return;
+        n.vx += (W / 2 - n.x) * 0.001;
+        n.vy += (H / 2 - n.y) * 0.001;
+        n.vx *= 0.85;
+        n.vy *= 0.85;
+        n.x += n.vx;
+        n.y += n.vy;
+        n.x = Math.max(20, Math.min(W - 20, n.x));
+        n.y = Math.max(20, Math.min(H - 20, n.y));
+      });
+    }
+
+    const svgns = 'http://www.w3.org/2000/svg';
+    const linkEls = links.map(() => {
+      const line = document.createElementNS(svgns, 'line');
+      line.setAttribute('stroke', '#3a3d42');
+      line.setAttribute('stroke-width', '1');
+      svg.appendChild(line);
+      return line;
+    });
+    const nodeGroups = simNodes.map((n) => {
+      const g = document.createElementNS(svgns, 'g');
+      (g as unknown as HTMLElement).style.cursor = n.href ? 'pointer' : 'default';
+      const circle = document.createElementNS(svgns, 'circle');
+      circle.setAttribute('r', String(n.r));
+      circle.setAttribute('fill', n.hub ? '#fbbf24' : '#fff');
+      circle.setAttribute('stroke', n.hub ? 'none' : '#00000022');
+      g.appendChild(circle);
+      const text = document.createElementNS(svgns, 'text');
+      text.textContent = n.hub ? n.label : n.label.length > 30 ? n.label.slice(0, 28) + '…' : n.label;
+      text.setAttribute('font-size', n.hub ? '13' : '10');
+      text.setAttribute('fill', n.hub ? '#fff' : '#cfcfcf');
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dy', n.hub ? '-16' : '-10');
+      g.appendChild(text);
+      svg.appendChild(g);
+      return g;
+    });
+
+    function render() {
+      links.forEach((l, i) => {
+        const line = linkEls[i];
+        line.setAttribute('x1', String(l.source.x));
+        line.setAttribute('y1', String(l.source.y));
+        line.setAttribute('x2', String(l.target.x));
+        line.setAttribute('y2', String(l.target.y));
+      });
+      simNodes.forEach((n, i) => {
+        nodeGroups[i].setAttribute('transform', `translate(${n.x},${n.y})`);
+      });
+    }
+
+    let ticks = 0;
+    function loop() {
+      tick();
+      render();
+      ticks++;
+      if (ticks < 220) requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    let dragNode: SimNode | null = null;
+    let dragged = false;
+    let startX = 0, startY = 0;
+
+    function svgPoint(evt: PointerEvent) {
+      const rect = svg!.getBoundingClientRect();
+      return {
+        x: ((evt.clientX - rect.left) / rect.width) * W,
+        y: ((evt.clientY - rect.top) / rect.height) * H,
+      };
+    }
+
+    nodeGroups.forEach((g, i) => {
+      g.addEventListener('pointerdown', (e) => {
+        dragNode = simNodes[i];
+        dragged = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        dragNode.fixed = true;
+        ticks = Math.max(0, ticks - 60);
+        requestAnimationFrame(loop);
+        e.preventDefault();
+      });
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!dragNode) return;
+      if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) dragged = true;
+      const p = svgPoint(e);
+      dragNode.x = p.x;
+      dragNode.y = p.y;
+      dragNode.vx = 0;
+      dragNode.vy = 0;
+      render();
+    });
+    window.addEventListener('pointerup', () => {
+      if (dragNode) {
+        const n = dragNode;
+        n.fixed = false;
+        if (!dragged && n.href) {
+          window.location.href = n.href;
+        }
+        dragNode = null;
+      }
+    });
+  }
+</script>
+
+<style>
+  .kg-hint {
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+    margin: 10px 0 0;
+  }
+  #kg-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>

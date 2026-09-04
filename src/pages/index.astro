@@ -1,10 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
+import KnowledgeGraph from '../components/KnowledgeGraph.astro';
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('writings'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 4);
+const allPosts = (await getCollection('writings'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const posts = allPosts.slice(0, 4);
 ---
 <Base>
   <section class="wrap hero">
@@ -66,10 +67,7 @@ const posts = (await getCollection('writings'))
     <div class="wrap">
       <div class="eyebrow">Knowledge Map</div>
       <h2>Ideas should connect like ideas — not like folders.</h2>
-      <div class="map">
-        <span class="node hub n1"></span><span class="node n2"></span><span class="node n3"></span>
-        <span class="node hub n4"></span><span class="node n5"></span><span class="node hub n6"></span>
-      </div>
+      <KnowledgeGraph posts={allPosts} />
     </div>
   </section>
 
