@@ -10,7 +10,7 @@ const { title = 'Maheswaran — Engineering Field Notebook' } = Astro.props;
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{title}</title>
-  <style>
+  <style is:global>
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f3ec;color:#191a1c}
     header{position:sticky;top:0;background:rgba(246,243,236,.95);border-bottom:1px solid #ddd;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
     nav a{margin-left:18px;color:#444;text-decoration:none;font-size:14px}
