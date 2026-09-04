@@ -1,11 +1,14 @@
 ---
-// Renders the Knowledge Map as a real force-directed graph: one hub node per
-// category, one leaf node per article, edges connecting article -> category.
-// Layout + interaction (drag, click-to-navigate) run client-side in vanilla
-// JS/SVG below - no charting library, so nothing to fail a blind CI build.
+// Renders the Knowledge Map as a real graph: one hub node per category, one
+// leaf node per article, edges connecting article -> category. Layout is an
+// anchored radial fan computed here at build time (hubs evenly spaced on a
+// ring, each hub's articles fanned around it) - client-side physics only
+// adds a light spring-to-anchor + gentle repulsion for an organic settle and
+// draggability, it does not decide the overall structure. That's what makes
+// this version stable instead of everything drifting into one clump.
 interface Post {
   id: string;
-  data: { title: string; category: string };
+  data: { title: string; category: string; stage: 'seedling' | 'budding' | 'evergreen' };
 }
 interface Props {
   posts: Post[];
@@ -20,7 +23,20 @@ const categoryLabels: Record<string, string> = {
   books: 'Books & Films',
 };
 
+const W = 1000, H = 460;
+const cx = W / 2, cy = H / 2;
+const hubRadius = 110;
+const leafRadius = 200;
+
 const categoriesUsed = [...new Set(posts.map((p) => p.data.category))];
+const hubAngle: Record<string, number> = {};
+categoriesUsed.forEach((c, i) => {
+  hubAngle[c] = (i / categoriesUsed.length) * Math.PI * 2 - Math.PI / 2;
+});
+
+const byCategory: Record<string, Post[]> = {};
+categoriesUsed.forEach((c) => (byCategory[c] = []));
+posts.forEach((p) => byCategory[p.data.category].push(p));
 
 const nodes = [
   ...categoriesUsed.map((c) => ({
@@ -28,22 +44,36 @@ const nodes = [
     label: categoryLabels[c] ?? c,
     hub: true,
     href: null as string | null,
+    stage: null as string | null,
+    ax: cx + Math.cos(hubAngle[c]) * hubRadius,
+    ay: cy + Math.sin(hubAngle[c]) * hubRadius,
   })),
-  ...posts.map((p) => ({
-    id: p.id,
-    label: p.data.title,
-    hub: false,
-    href: `/writings/${p.id}/`,
-  })),
+  ...categoriesUsed.flatMap((c) => {
+    const arr = byCategory[c];
+    const spread = Math.min(1.1, 0.4 * arr.length);
+    return arr.map((p, i) => {
+      const t = arr.length > 1 ? i / (arr.length - 1) - 0.5 : 0;
+      const angle = hubAngle[c] + t * spread;
+      return {
+        id: p.id,
+        label: p.data.title,
+        hub: false,
+        href: `/writings/${p.id}/`,
+        stage: p.data.stage as string | null,
+        ax: cx + Math.cos(angle) * leafRadius,
+        ay: cy + Math.sin(angle) * leafRadius,
+      };
+    });
+  }),
 ];
 
 const edges = posts.map((p) => ({ source: p.id, target: `cat:${p.data.category}` }));
 
-const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
+const graphJson = JSON.stringify({ nodes, edges, W, H }).replace(/</g, '\\u003c');
 ---
 <div class="map" id="knowledge-map">
-  <svg id="kg-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge map — click a node to open that entry"></svg>
-  <p class="kg-hint">Drag to explore, click a node to open it.</p>
+  <svg id="kg-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge map — click a node to open that entry"></svg>
+  <p class="kg-hint">Drag to explore, click a node to open it. 🌱🌿🌳 rings show how settled each idea is.</p>
 </div>
 <script type="application/json" id="kg-data" set:html={graphJson} />
 
@@ -51,26 +81,30 @@ const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
   const dataEl = document.getElementById('kg-data');
   const svg = document.getElementById('kg-svg') as unknown as SVGSVGElement | null;
   if (dataEl && svg) {
-    const { nodes, edges } = JSON.parse(dataEl.textContent || '{}') as {
-      nodes: { id: string; label: string; hub: boolean; href: string | null }[];
+    const { nodes, edges, W, H } = JSON.parse(dataEl.textContent || '{}') as {
+      nodes: { id: string; label: string; hub: boolean; href: string | null; stage: string | null; ax: number; ay: number }[];
       edges: { source: string; target: string }[];
+      W: number;
+      H: number;
     };
 
     type SimNode = (typeof nodes)[number] & {
       x: number; y: number; vx: number; vy: number; r: number; fixed?: boolean;
     };
 
-    const W = 900, H = 420;
     const simNodes = nodes as SimNode[];
+    const stageColor: Record<string, string> = {
+      seedling: '#9fcf7f',
+      budding: '#5b9a5b',
+      evergreen: '#2f6b3f',
+    };
 
-    simNodes.forEach((n, i) => {
-      const angle = (i / simNodes.length) * Math.PI * 2;
-      const radius = n.hub ? 70 : 160;
-      n.x = W / 2 + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
-      n.y = H / 2 + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
+    simNodes.forEach((n) => {
+      n.x = n.ax + (Math.random() - 0.5) * 10;
+      n.y = n.ay + (Math.random() - 0.5) * 10;
       n.vx = 0;
       n.vy = 0;
-      n.r = n.hub ? 11 : 6;
+      n.r = n.hub ? 12 : 7;
     });
 
     const byId = Object.fromEntries(simNodes.map((n) => [n.id, n]));
@@ -79,38 +113,32 @@ const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
       .filter((l) => l.source && l.target);
 
     function tick() {
+      // short-range repulsion: only enough to keep close neighbours from overlapping
       for (let i = 0; i < simNodes.length; i++) {
         for (let j = i + 1; j < simNodes.length; j++) {
           const a = simNodes[i], b = simNodes[j];
           const dx = a.x - b.x, dy = a.y - b.y;
           const distSq = dx * dx + dy * dy || 0.01;
           const dist = Math.sqrt(distSq);
-          if (dist < 220) {
-            const force = 900 / distSq;
+          if (dist < 70) {
+            const force = 260 / distSq;
             const fx = (dx / dist) * force, fy = (dy / dist) * force;
             if (!a.fixed) { a.vx += fx; a.vy += fy; }
             if (!b.fixed) { b.vx -= fx; b.vy -= fy; }
           }
         }
       }
-      links.forEach((l) => {
-        const dx = l.target.x - l.source.x, dy = l.target.y - l.source.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-        const force = (dist - 90) * 0.02;
-        const fx = (dx / dist) * force, fy = (dy / dist) * force;
-        if (!l.source.fixed) { l.source.vx += fx; l.source.vy += fy; }
-        if (!l.target.fixed) { l.target.vx -= fx; l.target.vy -= fy; }
-      });
+      // the structure itself comes from a spring back to each node's fixed
+      // radial anchor, not from repulsion/centering - that's what keeps hubs
+      // and their articles from drifting into one central clump
       simNodes.forEach((n) => {
         if (n.fixed) return;
-        n.vx += (W / 2 - n.x) * 0.001;
-        n.vy += (H / 2 - n.y) * 0.001;
-        n.vx *= 0.85;
-        n.vy *= 0.85;
+        n.vx += (n.ax - n.x) * 0.06;
+        n.vy += (n.ay - n.y) * 0.06;
+        n.vx *= 0.78;
+        n.vy *= 0.78;
         n.x += n.vx;
         n.y += n.vy;
-        n.x = Math.max(20, Math.min(W - 20, n.x));
-        n.y = Math.max(20, Math.min(H - 20, n.y));
       });
     }
 
@@ -128,14 +156,16 @@ const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
       const circle = document.createElementNS(svgns, 'circle');
       circle.setAttribute('r', String(n.r));
       circle.setAttribute('fill', n.hub ? '#fbbf24' : '#fff');
-      circle.setAttribute('stroke', n.hub ? 'none' : '#00000022');
+      circle.setAttribute('stroke', n.hub ? 'none' : n.stage ? stageColor[n.stage] : '#00000022');
+      circle.setAttribute('stroke-width', n.hub ? '0' : '2.5');
       g.appendChild(circle);
       const text = document.createElementNS(svgns, 'text');
-      text.textContent = n.hub ? n.label : n.label.length > 30 ? n.label.slice(0, 28) + '…' : n.label;
-      text.setAttribute('font-size', n.hub ? '13' : '10');
-      text.setAttribute('fill', n.hub ? '#fff' : '#cfcfcf');
+      text.textContent = n.hub ? n.label : n.label.length > 34 ? n.label.slice(0, 32) + '…' : n.label;
+      text.setAttribute('font-size', n.hub ? '14' : '10.5');
+      text.setAttribute('font-weight', n.hub ? '700' : '400');
+      text.setAttribute('fill', n.hub ? '#fff' : '#d8d8d8');
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('dy', n.hub ? '-16' : '-10');
+      text.setAttribute('dy', n.hub ? '-18' : '-12');
       g.appendChild(text);
       svg.appendChild(g);
       return g;
@@ -159,7 +189,7 @@ const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
       tick();
       render();
       ticks++;
-      if (ticks < 220) requestAnimationFrame(loop);
+      if (ticks < 140) requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
 
@@ -201,6 +231,8 @@ const graphJson = JSON.stringify({ nodes, edges }).replace(/</g, '\\u003c');
       if (dragNode) {
         const n = dragNode;
         n.fixed = false;
+        ticks = Math.max(0, ticks - 40);
+        requestAnimationFrame(loop);
         if (!dragged && n.href) {
           window.location.href = n.href;
         }

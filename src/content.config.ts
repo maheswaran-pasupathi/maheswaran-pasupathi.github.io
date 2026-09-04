@@ -10,6 +10,11 @@ const writings = defineCollection({
     categoryLabel: z.string(),
     meta: z.string(),
     excerpt: z.string(),
+    // Digital-garden growth stage - how settled the idea is, independent of
+    // publish date. seedling: a rough note or open question. budding: worked
+    // out and useful, but could still be revised. evergreen: revisited more
+    // than once and holding up.
+    stage: z.enum(['seedling', 'budding', 'evergreen']).default('seedling'),
   }),
 });
 

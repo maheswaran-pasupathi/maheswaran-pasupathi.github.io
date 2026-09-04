@@ -5,6 +5,7 @@ category: journeys
 categoryLabel: "Journeys · Sweden"
 meta: "Journeys · Sweden · 6 min"
 excerpt: "A travel note from Södertälje on technical culture, conversations, and the small things that stayed with me."
+stage: seedling
 ---
 
 *Draft placeholder — I want to write this one properly rather than rush it. Notes so far:*

@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import StageBadge from '../../components/StageBadge.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('writings'))
@@ -10,11 +11,12 @@ const posts = (await getCollection('writings'))
     <div class="wrap">
       <div class="eyebrow">All entries</div>
       <h2>Writings</h2>
+      <p class="stage-legend">🌱 Seedling — a rough note or open question &nbsp;·&nbsp; 🌿 Budding — worked out, could still change &nbsp;·&nbsp; 🌳 Evergreen — revisited and holding up</p>
       {posts.map((post) => (
         <a class="post" href={`/writings/${post.id}/`}>
           <div class="visual"></div>
           <div class="content">
-            <div class="meta">{post.data.meta}</div>
+            <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
             <h3>{post.data.title}</h3>
             <p>{post.data.excerpt}</p>
           </div>

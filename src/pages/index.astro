@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import KnowledgeGraph from '../components/KnowledgeGraph.astro';
+import StageBadge from '../components/StageBadge.astro';
 import { getCollection } from 'astro:content';
 
 const allPosts = (await getCollection('writings'))
@@ -28,6 +29,7 @@ const posts = allPosts.slice(0, 4);
     <div class="wrap">
       <div class="eyebrow">Fresh entries</div>
       <h2>Latest from the Garden</h2>
+      <p class="stage-legend">🌱 Seedling — a rough note or open question &nbsp;·&nbsp; 🌿 Budding — worked out, could still change &nbsp;·&nbsp; 🌳 Evergreen — revisited and holding up</p>
       <div class="filters">
         <button class="active" data-filter="all">Everything</button>
         <button data-filter="physics">Physics</button>
@@ -40,7 +42,7 @@ const posts = allPosts.slice(0, 4);
         <a class="post" data-cat={post.data.category} href={`/writings/${post.id}/`}>
           <div class="visual"></div>
           <div class="content">
-            <div class="meta">{post.data.meta}</div>
+            <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
             <h3>{post.data.title}</h3>
             <p>{post.data.excerpt}</p>
           </div>

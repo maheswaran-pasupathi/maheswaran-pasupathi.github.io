@@ -1,0 +1,27 @@
+---
+interface Props {
+  stage: 'seedling' | 'budding' | 'evergreen';
+}
+const { stage } = Astro.props;
+
+const meta = {
+  seedling: { icon: '🌱', label: 'Seedling', title: 'Seedling — a rough note or an open question, not settled yet.' },
+  budding: { icon: '🌿', label: 'Budding', title: 'Budding — worked out and useful, but could still be revised.' },
+  evergreen: { icon: '🌳', label: 'Evergreen', title: 'Evergreen — revisited more than once and holding up.' },
+}[stage];
+---
+<span class="stage-badge" title={meta.title}>{meta.icon} {meta.label}</span>
+
+<style>
+  .stage-badge {
+    display: inline-block;
+    font-size: 11px;
+    color: #666;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 999px;
+    padding: 3px 9px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>

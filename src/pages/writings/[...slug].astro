@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import StageBadge from '../../components/StageBadge.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -16,7 +17,7 @@ const { Content } = await render(post);
 <Base title={`${post.data.title} — Maheswaran`}>
   <article class="wrap prose">
     <p><a class="back-link" href="/writings/">← All writings</a></p>
-    <div class="eyebrow">{post.data.meta}</div>
+    <div class="eyebrow">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
     <h1>{post.data.title}</h1>
     <Content />
     <p style="margin-top:50px"><a class="back-link" href="/writings/">← All writings</a></p>
