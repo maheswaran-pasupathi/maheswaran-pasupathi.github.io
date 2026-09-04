@@ -1,0 +1,84 @@
+---
+interface Props {
+  title?: string;
+}
+const { title = 'Maheswaran — Engineering Field Notebook' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{title}</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f3ec;color:#191a1c}
+    header{position:sticky;top:0;background:rgba(246,243,236,.95);border-bottom:1px solid #ddd;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
+    nav a{margin-left:18px;color:#444;text-decoration:none;font-size:14px}
+    .wrap{max-width:1180px;margin:auto;padding:70px 28px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:end}
+    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:#777}
+    .hero h1{font-size:64px;line-height:1.03;margin:12px 0 18px;letter-spacing:-.045em}
+    .hero p{font-size:19px;line-height:1.7;color:#666;max-width:760px}
+    .card{background:#ece6da;border:1px solid #d6d0c7;border-radius:28px;padding:26px}
+    .tags span,.filters button{display:inline-block;border:1px solid #ccc;border-radius:999px;padding:9px 13px;margin:4px;background:#fff}
+    .section{border-top:1px solid #ddd}
+    .section h2{font-size:40px;margin:8px 0 30px}
+    .filters{margin-bottom:26px}
+    .filters button{cursor:pointer}
+    .filters button.active{background:#191a1c;color:white}
+    .post{display:grid;grid-template-columns:220px 1fr;gap:0;border:1px solid #ddd;background:#fff;border-radius:24px;overflow:hidden;margin:16px 0;text-decoration:none;color:inherit}
+    .post .visual{min-height:180px;background:#111315;position:relative}
+    .post .visual:after{content:"";position:absolute;inset:25% 15%;border-radius:50%;background:radial-gradient(circle,#66d9ef55,transparent 60%)}
+    .post .content{padding:24px}
+    .meta{font-size:12px;color:#777}
+    .post h3{font-size:26px;margin:12px 0}
+    .post p{color:#666;line-height:1.6}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .topic{border:1px solid #ddd;background:#fbf9f4;border-radius:24px;padding:22px}
+    .topic h3{margin-top:5px}
+    .topic li{margin:8px 0;color:#666;font-size:14px}
+    .map{height:360px;background:#111315;border-radius:28px;position:relative;overflow:hidden}
+    .node{position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 0 5px #ffffff14}
+    .hub{width:22px;height:22px;background:#fbbf24}
+    .n1{left:48%;top:48%} .n2{left:32%;top:27%} .n3{left:24%;top:52%}
+    .n4{left:65%;top:32%} .n5{left:74%;top:59%} .n6{left:84%;top:75%}
+    .life{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .life .card{background:#fff}
+    .life a.card{text-decoration:none;color:inherit;display:block}
+    .muted{color:#777}
+    .footer{background:#191a1c;color:#fff;padding:35px 28px;margin-top:60px}
+    .footer div{max-width:1180px;margin:auto}
+    /* article prose — additive only, does not touch existing rules above */
+    .prose{max-width:760px}
+    .prose h1{font-size:44px;line-height:1.1;letter-spacing:-.03em;margin:14px 0 24px}
+    .prose p{font-size:18px;line-height:1.75;color:#333;margin:0 0 22px}
+    .prose h2{font-size:26px;margin:40px 0 14px}
+    .prose ul,.prose ol{font-size:18px;line-height:1.75;color:#333;padding-left:22px}
+    .prose li{margin:0 0 10px}
+    .prose code{background:#ece6da;border-radius:5px;padding:2px 6px;font-size:15px}
+    .prose a{color:#191a1c}
+    .back-link{font-size:14px;color:#444;text-decoration:none}
+    @media(max-width:850px){.hero,.post,.grid,.life{grid-template-columns:1fr}.hero h1{font-size:46px}nav{display:none}}
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" style="text-decoration:none;color:inherit"><strong>Maheswaran <span class="muted">· Field Notebook</span></strong></a>
+    <nav>
+      <a href="/writings/">Writings</a>
+      <a href="/explorations/">Explorations</a>
+      <a href="/#map">Knowledge Map</a>
+      <a href="/life/">Life</a>
+    </nav>
+  </header>
+  <main>
+    <slot />
+  </main>
+  <footer class="footer">
+    <div>
+      <strong>Maheswaran</strong><br />
+      <span style="color:#aaa">Engineering · computation · explorations · life</span>
+    </div>
+  </footer>
+</body>
+</html>

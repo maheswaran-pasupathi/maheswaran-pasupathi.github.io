@@ -1,0 +1,104 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('writings'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 4);
+---
+<Base>
+  <section class="wrap hero">
+    <div>
+      <div class="eyebrow">Engineering field notebook + life archive</div>
+      <h1>I build, learn, question — and document what stays.</h1>
+      <p>I'm Maheswaran, an engineer working across CFD, thermal-fluid sciences, combustion and AI-enabled engineering. This is where simulations, experiments, books, journeys and unfinished questions live together.</p>
+    </div>
+    <aside class="card">
+      <div class="eyebrow">Currently exploring</div>
+      <div class="tags">
+        <span>Hydrogen combustion</span><span>Scientific ML</span><span>Modelica</span>
+        <span>Surrogate models</span><span>Battery thermal</span><span>First principles</span>
+      </div>
+      <p><em>Build → Learn → Understand → Document → Revisit.</em></p>
+    </aside>
+  </section>
+
+  <section id="latest" class="section">
+    <div class="wrap">
+      <div class="eyebrow">Fresh entries</div>
+      <h2>Latest from the Garden</h2>
+      <div class="filters">
+        <button class="active" data-filter="all">Everything</button>
+        <button data-filter="physics">Physics</button>
+        <button data-filter="computation">Computation</button>
+        <button data-filter="experiments">Experiments</button>
+        <button data-filter="journeys">Journeys</button>
+        <button data-filter="books">Books & Films</button>
+      </div>
+      {posts.map((post) => (
+        <a class="post" data-cat={post.data.category} href={`/writings/${post.id}/`}>
+          <div class="visual"></div>
+          <div class="content">
+            <div class="meta">{post.data.meta}</div>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.excerpt}</p>
+          </div>
+        </a>
+      ))}
+      <p><a class="back-link" href="/writings/">All writings →</a></p>
+    </div>
+  </section>
+
+  <section id="explorations" class="section">
+    <div class="wrap">
+      <div class="eyebrow">Explorations</div>
+      <h2>The territories I keep returning to.</h2>
+      <div class="grid">
+        <div class="topic"><h3>Engine</h3><ul><li>Combustion</li><li>Spray & ignition</li><li>Hydrogen–diesel</li><li>Methanol–diesel</li><li>CHT</li></ul></div>
+        <div class="topic"><h3>Battery</h3><ul><li>Cell thermal</li><li>Pack cooling</li><li>Thermal runaway</li><li>Propagation</li><li>BESS cooling</li></ul></div>
+        <div class="topic"><h3>Vehicle</h3><ul><li>Aerodynamics</li><li>Thermal management</li><li>HVAC</li><li>Cooling systems</li><li>Energy flow</li></ul></div>
+        <div class="topic"><h3>AI + Physical Systems</h3><ul><li>DOE</li><li>Surrogates</li><li>Optimization</li><li>Scientific ML</li><li>AI agents</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="map" class="section" style="background:#e9e4da">
+    <div class="wrap">
+      <div class="eyebrow">Knowledge Map</div>
+      <h2>Ideas should connect like ideas — not like folders.</h2>
+      <div class="map">
+        <span class="node hub n1"></span><span class="node n2"></span><span class="node n3"></span>
+        <span class="node hub n4"></span><span class="node n5"></span><span class="node hub n6"></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="life" class="section">
+    <div class="wrap">
+      <div class="eyebrow">Life</div>
+      <h2>Books, films, journeys and things worth remembering.</h2>
+      <div class="life">
+        <div class="card"><h3>Books</h3><p>What stayed with me, not just what I finished.</p></div>
+        <div class="card"><h3>Movies & Documentaries</h3><p>Stories, ideas and scenes worth remembering.</p></div>
+        <div class="card"><h3>Travel Diary</h3><p>Places, photographs, food, work trips and observations.</p></div>
+      </div>
+      <p style="margin-top:20px"><a class="back-link" href="/life/">More on Life →</a></p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll('.filters button');
+  const posts = document.querySelectorAll('.post');
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = btn.dataset.filter;
+      posts.forEach((p) => {
+        const el = p as HTMLElement;
+        el.style.display = cat === 'all' || el.dataset.cat === cat ? 'grid' : 'none';
+      });
+    });
+  });
+</script>
