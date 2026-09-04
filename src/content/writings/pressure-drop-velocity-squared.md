@@ -13,7 +13,7 @@ Every engineer learns the shortcut early: double the flow velocity, pressure dro
 
 Start with Darcy–Weisbach:
 
-$$ \Delta p = f \, \frac{L}{D} \, \frac{\rho V^2}{2} $$
+$$ \Delta p = f \cdot \frac{L}{D} \cdot \frac{\rho V^2}{2} $$
 
 The $V^2$ sits right there in the equation, so the shortcut looks airtight. The part that gets skipped is that $f$, the friction factor, is not a constant. It's a function of the Reynolds number and, once the flow is turbulent, of relative roughness too.
 
