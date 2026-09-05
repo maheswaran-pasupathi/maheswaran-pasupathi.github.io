@@ -4,7 +4,7 @@ import StageBadge from '../../components/StageBadge.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('writings');
+  const posts = await getCollection('writings', ({ data }) => !data.draft);
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
@@ -14,12 +14,48 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 ---
-<Base title={`${post.data.title} — Maheswaran`}>
+<Base
+  title={`${post.data.title} — Maheswaran`}
+  description={post.data.excerpt}
+  type="article"
+  image={post.data.cover}
+>
   <article class="wrap prose">
     <p><a class="back-link" href="/writings/">← All writings</a></p>
     <div class="eyebrow">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
     <h1>{post.data.title}</h1>
+    {post.data.cover && (
+      <figure class="post-cover">
+        <img src={post.data.cover} alt={post.data.coverAlt ?? ''} />
+        {post.data.coverCredit && (
+          <figcaption>
+            {post.data.coverCreditUrl
+              ? <a href={post.data.coverCreditUrl}>{post.data.coverCredit}</a>
+              : post.data.coverCredit}
+          </figcaption>
+        )}
+      </figure>
+    )}
     <Content />
     <p style="margin-top:50px"><a class="back-link" href="/writings/">← All writings</a></p>
   </article>
 </Base>
+
+<style>
+  .post-cover {
+    margin: 24px 0 34px;
+  }
+  .post-cover img {
+    width: 100%;
+    border-radius: 18px;
+    display: block;
+  }
+  .post-cover figcaption {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+  }
+  .post-cover figcaption a {
+    color: #999;
+  }
+</style>

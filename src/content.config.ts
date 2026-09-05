@@ -15,6 +15,16 @@ const writings = defineCollection({
     // out and useful, but could still be revised. evergreen: revisited more
     // than once and holding up.
     stage: z.enum(['seedling', 'budding', 'evergreen']).default('seedling'),
+    // Work-in-progress: keep the file in the repo but out of the build.
+    draft: z.boolean().default(false),
+    // Optional cover image. Put the file in public/images/ and use an absolute
+    // path like "/images/foo.jpg". Shown on the post card, the article header,
+    // and as the social-share (Open Graph) image. Credit line is required for
+    // anything not your own - see CREDITS.md.
+    cover: z.string().optional(),
+    coverAlt: z.string().optional(),
+    coverCredit: z.string().optional(),
+    coverCreditUrl: z.string().optional(),
   }),
 });
 

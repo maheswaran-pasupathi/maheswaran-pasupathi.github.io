@@ -1,0 +1,26 @@
+name: Regenerate lockfile
+
+# Manual utility. There is no Node on the machine I usually work from, so when
+# dependencies in package.json change I run this to produce a fresh
+# package-lock.json and download it from the run's artifacts, then commit it.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Resolve dependencies
+        run: npm install --package-lock-only
+      - name: Upload lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-lock
+          path: package-lock.json

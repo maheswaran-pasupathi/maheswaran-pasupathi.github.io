@@ -3,10 +3,11 @@ import Base from '../../layouts/Base.astro';
 import StageBadge from '../../components/StageBadge.astro';
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('writings'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const posts = (await getCollection('writings', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
 ---
-<Base title="Writings — Maheswaran">
+<Base title="Writings — Maheswaran" description="Everything in the notebook so far — engineering notes, worked out in public.">
   <section class="section" style="border-top:none">
     <div class="wrap">
       <div class="eyebrow">All entries</div>
@@ -14,7 +15,9 @@ const posts = (await getCollection('writings'))
       <p class="stage-legend">🌱 Seedling — a rough note or open question &nbsp;·&nbsp; 🌿 Budding — worked out, could still change &nbsp;·&nbsp; 🌳 Evergreen — revisited and holding up</p>
       {posts.map((post) => (
         <a class="post" href={`/writings/${post.id}/`}>
-          <div class="visual"></div>
+          <div class="visual">
+            {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />}
+          </div>
           <div class="content">
             <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
             <h3>{post.data.title}</h3>

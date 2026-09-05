@@ -3,8 +3,9 @@ import Base from '../layouts/Base.astro';
 import KnowledgeGraph from '../components/KnowledgeGraph.astro';
 import StageBadge from '../components/StageBadge.astro';
 import { getCollection } from 'astro:content';
+import { heroImage, explorationImages } from '../data/siteImages';
 
-const allPosts = (await getCollection('writings'))
+const allPosts = (await getCollection('writings', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const posts = allPosts.slice(0, 4);
 ---
@@ -25,6 +26,17 @@ const posts = allPosts.slice(0, 4);
     </aside>
   </section>
 
+  {heroImage && (
+    <figure class="hero-figure">
+      <img src={heroImage.src} alt={heroImage.alt} />
+      {heroImage.credit && (
+        <figcaption>
+          {heroImage.creditUrl ? <a href={heroImage.creditUrl}>{heroImage.credit}</a> : heroImage.credit}
+        </figcaption>
+      )}
+    </figure>
+  )}
+
   <section id="latest" class="section">
     <div class="wrap">
       <div class="eyebrow">Fresh entries</div>
@@ -40,7 +52,9 @@ const posts = allPosts.slice(0, 4);
       </div>
       {posts.map((post) => (
         <a class="post" data-cat={post.data.category} href={`/writings/${post.id}/`}>
-          <div class="visual"></div>
+          <div class="visual">
+            {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />}
+          </div>
           <div class="content">
             <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
             <h3>{post.data.title}</h3>
@@ -57,10 +71,21 @@ const posts = allPosts.slice(0, 4);
       <div class="eyebrow">Explorations</div>
       <h2>The territories I keep returning to.</h2>
       <div class="grid">
-        <div class="topic"><h3>Engine</h3><ul><li>Combustion</li><li>Spray & ignition</li><li>Hydrogen–diesel</li><li>Methanol–diesel</li><li>CHT</li></ul></div>
-        <div class="topic"><h3>Battery</h3><ul><li>Cell thermal</li><li>Pack cooling</li><li>Thermal runaway</li><li>Propagation</li><li>BESS cooling</li></ul></div>
-        <div class="topic"><h3>Vehicle</h3><ul><li>Aerodynamics</li><li>Thermal management</li><li>HVAC</li><li>Cooling systems</li><li>Energy flow</li></ul></div>
-        <div class="topic"><h3>AI + Physical Systems</h3><ul><li>DOE</li><li>Surrogates</li><li>Optimization</li><li>Scientific ML</li><li>AI agents</li></ul></div>
+        {[
+          { name: 'Engine', items: ['Combustion', 'Spray & ignition', 'Hydrogen–diesel', 'Methanol–diesel', 'CHT'] },
+          { name: 'Battery', items: ['Cell thermal', 'Pack cooling', 'Thermal runaway', 'Propagation', 'BESS cooling'] },
+          { name: 'Vehicle', items: ['Aerodynamics', 'Thermal management', 'HVAC', 'Cooling systems', 'Energy flow'] },
+          { name: 'AI + Physical Systems', items: ['DOE', 'Surrogates', 'Optimization', 'Scientific ML', 'AI agents'] },
+        ].map((topic) => {
+          const img = explorationImages[topic.name];
+          return (
+            <div class="topic">
+              {img && <img class="topic-img" src={img.src} alt={img.alt} loading="lazy" />}
+              <h3>{topic.name}</h3>
+              <ul>{topic.items.map((it) => <li>{it}</li>)}</ul>
+            </div>
+          );
+        })}
       </div>
     </div>
   </section>
