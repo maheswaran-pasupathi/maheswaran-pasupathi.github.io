@@ -6,6 +6,10 @@ categoryLabel: "Computation · AI for engineering"
 meta: "Computation · AI for engineering · 12 min"
 excerpt: "A practical engineering view of extrapolation, confidence, and why a fast prediction is useful only when we know its limits."
 stage: budding
+cover: /images/concept-car-tunnel.jpg
+coverAlt: "A concept car front-on in a dark tunnel lined with light strips"
+coverCredit: "Photo: Cicero Barbosa / Pexels"
+coverCreditUrl: "https://www.pexels.com/photo/white-toyota-ft-1-concept-15381774/"
 ---
 
 A surrogate model — a regression, a response surface, a neural net trained on a batch of CFD runs — will always give you an answer. That's exactly the problem. It doesn't know the difference between interpolating inside the design space it was trained on and extrapolating wildly outside it; both come back as a number with the same confident formatting.

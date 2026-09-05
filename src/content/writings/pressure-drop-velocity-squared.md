@@ -6,6 +6,10 @@ categoryLabel: "Physics · Fluid mechanics"
 meta: "Physics · Fluid mechanics · 8 min · 04 Sep 2026"
 excerpt: "A first-principles look at Darcy–Weisbach, friction factor, flow regime, and why the simple V² rule quietly breaks down."
 stage: budding
+cover: /images/river-flow-over-ledge.jpg
+coverAlt: "Long-exposure photograph of river water accelerating over a submerged ledge"
+coverCredit: "Photo: Nicolas DeSarno / Pexels"
+coverCreditUrl: "https://www.pexels.com/photo/body-of-water-during-daytime-195184/"
 ---
 
 Every engineer learns the shortcut early: double the flow velocity, pressure drop goes up roughly four times. It's a useful rule of thumb, and it's also not quite true — or rather, it's true only inside a window most of us stop checking once we've internalized it.

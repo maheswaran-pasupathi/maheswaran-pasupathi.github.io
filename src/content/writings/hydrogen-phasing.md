@@ -6,6 +6,10 @@ categoryLabel: "Experiments · Engine · Combustion"
 meta: "Experiments · Engine · Combustion · 14 min"
 excerpt: "Pilot timing, pilot quantity, hydrogen share and combustion phasing behave as one coupled problem."
 stage: budding
+cover: /images/flame-on-black.jpg
+coverAlt: "A sweep of orange flame against a black background"
+coverCredit: "Photo: Marek Piwnicki / Pexels"
+coverCreditUrl: "https://www.pexels.com/photo/close-up-shot-of-a-burning-fire-8738463/"
 ---
 
 Talk about hydrogen–diesel dual-fuel combustion and the conversation usually starts and ends with one number: hydrogen energy share. More hydrogen, less diesel, lower carbon — as if the fuel split were the whole story. It isn't. The variable that actually decides whether the strategy works is combustion phasing, and phasing is a function of several things moving together, not of hydrogen share alone.

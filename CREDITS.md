@@ -1,9 +1,9 @@
 # Image credits
 
-Every image used on this site that is not my own is listed here with its
-source and licence. Free-to-use sources: Unsplash, Pexels (no attribution
-required, credited anyway as a courtesy), Wikimedia Commons (licence varies
-per file — check and record the exact one).
+Every image on this site that is not my own is listed here with its source
+and licence. Free-to-use sources: Unsplash, Pexels (no attribution required —
+credited here and on the page as a courtesy), Wikimedia Commons (licence
+varies per file — record the exact one).
 
 ## How to add an image
 
@@ -16,6 +16,13 @@ per file — check and record the exact one).
 
 ## In use
 
-| File | Where | Source | Author | Licence |
-|------|-------|--------|--------|---------|
-| _(none yet)_ | | | | |
+| File | Where | Source | Photographer | Licence |
+|------|-------|--------|--------------|---------|
+| `jet-turbine-fan.jpg` | Homepage hero | [Pexels](https://www.pexels.com/photo/close-up-of-propeller-whirl-16160818/) | Joerg Mangelsen | Pexels licence |
+| `river-flow-over-ledge.jpg` | *Why doesn't pressure drop always scale exactly with V²?* | [Pexels](https://www.pexels.com/photo/body-of-water-during-daytime-195184/) | Nicolas DeSarno | Pexels licence |
+| `flame-on-black.jpg` | *Hydrogen isn't the combustion strategy — phasing is* | [Pexels](https://www.pexels.com/photo/close-up-shot-of-a-burning-fire-8738463/) | Marek Piwnicki | Pexels licence |
+| `concept-car-tunnel.jpg` | *Can a CFD surrogate know when it shouldn't be trusted?* | [Pexels](https://www.pexels.com/photo/white-toyota-ft-1-concept-15381774/) | Cicero Barbosa | Pexels licence |
+| `stockholm-winter-dusk.jpg` | *What Sweden changed in how I think about engineering teams* | [Pexels](https://www.pexels.com/photo/snow-on-buildings-in-city-20012796/) | Aleks Magnusson | Pexels licence |
+
+The [Pexels licence](https://www.pexels.com/license/) allows free use,
+including commercially, without permission or attribution.

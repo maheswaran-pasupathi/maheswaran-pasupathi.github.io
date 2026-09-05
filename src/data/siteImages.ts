@@ -12,7 +12,12 @@ export interface SiteImage {
   creditUrl?: string;
 }
 
-export const heroImage: SiteImage | null = null;
+export const heroImage: SiteImage | null = {
+  src: '/images/jet-turbine-fan.jpg',
+  alt: 'Looking straight into the fan blades of a jet engine turbine',
+  credit: 'Photo: Joerg Mangelsen / Pexels',
+  creditUrl: 'https://www.pexels.com/photo/close-up-of-propeller-whirl-16160818/',
+};
 
 export const explorationImages: Record<string, SiteImage | null> = {
   Engine: null,

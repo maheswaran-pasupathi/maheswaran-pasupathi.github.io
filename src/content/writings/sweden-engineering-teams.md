@@ -6,6 +6,10 @@ categoryLabel: "Journeys · Sweden"
 meta: "Journeys · Sweden · 6 min"
 excerpt: "A travel note from Södertälje on technical culture, conversations, and the small things that stayed with me."
 stage: seedling
+cover: /images/stockholm-winter-dusk.jpg
+coverAlt: "Snow-covered rooftops in Stockholm at blue hour, looking toward the water"
+coverCredit: "Photo: Aleks Magnusson / Pexels"
+coverCreditUrl: "https://www.pexels.com/photo/snow-on-buildings-in-city-20012796/"
 ---
 
 *Draft placeholder — I want to write this one properly rather than rush it. Notes so far:*
