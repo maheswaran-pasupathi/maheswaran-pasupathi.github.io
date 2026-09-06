@@ -1,113 +1,20 @@
 ---
-interface Props {
-  title?: string;
-  description?: string;
-  type?: 'website' | 'article';
-  image?: string;
-}
-const {
-  title = 'Maheswaran — Engineering Field Notebook',
-  description = 'An engineering field notebook and life archive — CFD, thermal-fluid sciences, combustion and AI-enabled engineering, worked out in public.',
-  type = 'website',
-  image,
-} = Astro.props;
-
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = image ? new URL(image, Astro.site) : undefined;
+interface Props { title?:string; description?:string; type?:'website'|'article'; image?:string; }
+const { title='Maheswaran — Engineering Field Notebook', description='An engineering field notebook and life archive — CFD, thermal-fluid sciences, combustion and AI-enabled engineering, worked out in public.', type='website', image }=Astro.props;
+const canonical=new URL(Astro.url.pathname,Astro.site);const ogImage=image?new URL(image,Astro.site):undefined;
 ---
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <link rel="canonical" href={canonical} />
-  <link rel="alternate" type="application/rss+xml" title="Maheswaran — Field Notebook" href="/rss.xml" />
-  <meta property="og:type" content={type} />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
-  {ogImage && <meta property="og:image" content={ogImage} />}
-  <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-  <meta name="twitter:title" content={title} />
-  <meta name="twitter:description" content={description} />
-  {ogImage && <meta name="twitter:image" content={ogImage} />}
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
-  <style is:global>
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f3ec;color:#191a1c}
-    header{position:sticky;top:0;background:rgba(246,243,236,.95);border-bottom:1px solid #ddd;padding:16px 28px;display:flex;justify-content:space-between;align-items:center}
-    nav a{margin-left:18px;color:#444;text-decoration:none;font-size:14px}
-    .wrap{max-width:1180px;margin:auto;padding:70px 28px}
-    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:end}
-    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:#777}
-    .hero h1{font-size:64px;line-height:1.03;margin:12px 0 18px;letter-spacing:-.045em}
-    .hero p{font-size:19px;line-height:1.7;color:#666;max-width:760px}
-    .card{background:#ece6da;border:1px solid #d6d0c7;border-radius:28px;padding:26px}
-    .tags span,.filters button{display:inline-block;border:1px solid #ccc;border-radius:999px;padding:9px 13px;margin:4px;background:#fff}
-    .section{border-top:1px solid #ddd}
-    .section h2{font-size:40px;margin:8px 0 30px}
-    .filters{margin-bottom:26px}
-    .stage-legend{font-size:13px;color:#888;margin:-14px 0 22px}
-    .filters button{cursor:pointer}
-    .filters button.active{background:#191a1c;color:white}
-    .post{display:grid;grid-template-columns:220px 1fr;gap:0;border:1px solid #ddd;background:#fff;border-radius:24px;overflow:hidden;margin:16px 0;text-decoration:none;color:inherit}
-    .post .visual{min-height:180px;background:#111315;position:relative;overflow:hidden}
-    .post .visual:not(:has(img)):after{content:"";position:absolute;inset:25% 15%;border-radius:50%;background:radial-gradient(circle,#66d9ef55,transparent 60%)}
-    .post .visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .post .content{padding:24px}
-    .meta{font-size:12px;color:#777}
-    .post h3{font-size:26px;margin:12px 0}
-    .post p{color:#666;line-height:1.6}
-    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .topic{border:1px solid #ddd;background:#fbf9f4;border-radius:24px;padding:22px;overflow:hidden}
-    .topic h3{margin-top:5px}
-    .topic li{margin:8px 0;color:#666;font-size:14px}
-    .topic-img{display:block;width:calc(100% + 44px);height:110px;object-fit:cover;margin:-22px -22px 16px}
-    .hero-figure{max-width:1180px;margin:0 auto;padding:10px 28px 0}
-    .hero-figure img{width:100%;max-height:420px;object-fit:cover;border-radius:28px;display:block}
-    .hero-figure figcaption{font-size:12px;color:#999;margin-top:8px;text-align:right}
-    .hero-figure figcaption a{color:#999}
-    .map{height:430px;background:#111315;border-radius:28px;position:relative;overflow:hidden}
-    .life{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .life .card{background:#fff}
-    .life a.card{text-decoration:none;color:inherit;display:block}
-    .muted{color:#777}
-    .footer{background:#191a1c;color:#fff;padding:35px 28px;margin-top:60px}
-    .footer div{max-width:1180px;margin:auto}
-    /* article prose — additive only, does not touch existing rules above */
-    .prose{max-width:760px}
-    .prose h1{font-size:44px;line-height:1.1;letter-spacing:-.03em;margin:14px 0 24px}
-    .prose p{font-size:18px;line-height:1.75;color:#333;margin:0 0 22px}
-    .prose h2{font-size:26px;margin:40px 0 14px}
-    .prose ul,.prose ol{font-size:18px;line-height:1.75;color:#333;padding-left:22px}
-    .prose li{margin:0 0 10px}
-    .prose code{background:#ece6da;border-radius:5px;padding:2px 6px;font-size:15px}
-    .prose a{color:#191a1c}
-    .back-link{font-size:14px;color:#444;text-decoration:none}
-    @media(max-width:850px){.hero,.post,.grid,.life{grid-template-columns:1fr}.hero h1{font-size:46px}nav{display:none}}
-  </style>
-</head>
-<body>
-  <header>
-    <a href="/" style="text-decoration:none;color:inherit"><strong>Maheswaran <span class="muted">· Field Notebook</span></strong></a>
-    <nav>
-      <a href="/writings/">Writings</a>
-      <a href="/explorations/">Explorations</a>
-      <a href="/#map">Knowledge Map</a>
-      <a href="/life/">Life</a>
-    </nav>
-  </header>
-  <main>
-    <slot />
-  </main>
-  <footer class="footer">
-    <div>
-      <strong>Maheswaran</strong><br />
-      <span style="color:#aaa">Engineering · computation · explorations · life</span>
-      <br />
-      <a href="/rss.xml" style="color:#aaa;font-size:13px">RSS</a>
-    </div>
-  </footer>
-</body>
-</html>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>{title}</title><meta name="description" content={description}/><link rel="canonical" href={canonical}/><link rel="alternate" type="application/rss+xml" title="Maheswaran — Field Notebook" href="/rss.xml"/>
+<meta property="og:type" content={type}/><meta property="og:title" content={title}/><meta property="og:description" content={description}/><meta property="og:url" content={canonical}/>{ogImage&&<meta property="og:image" content={ogImage}/>}<meta name="twitter:card" content={ogImage?'summary_large_image':'summary'}/><meta name="twitter:title" content={title}/><meta name="twitter:description" content={description}/>{ogImage&&<meta name="twitter:image" content={ogImage}/>}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"/>
+<style is:global>
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f3ec;color:#191a1c}header{position:sticky;top:0;z-index:20;background:rgba(246,243,236,.96);backdrop-filter:blur(10px);border-bottom:1px solid #ddd;padding:13px 28px;display:flex;justify-content:space-between;align-items:center}.brand{text-decoration:none;color:inherit}.desktop-nav{display:flex;align-items:center;gap:5px}.desktop-nav>a,.nav-group>summary{color:#444;text-decoration:none;font-size:14px;padding:9px 10px;border-radius:9px;cursor:pointer;list-style:none}.nav-group>summary::-webkit-details-marker{display:none}.nav-group{position:relative}.nav-group>summary:after{content:' ▾';font-size:10px;color:#888}.nav-group[open]>summary,.desktop-nav>a:hover{background:#ebe5da;color:#111}.nav-menu{position:absolute;right:0;top:40px;min-width:210px;background:#fff;border:1px solid #ddd;border-radius:14px;padding:7px;box-shadow:0 14px 35px #0002}.nav-menu a{display:block;margin:0;padding:10px 11px;border-radius:9px;color:#444;text-decoration:none;font-size:13px}.nav-menu a:hover{background:#f3efe7;color:#111}.mobile-nav{display:none}.wrap{max-width:1180px;margin:auto;padding:70px 28px}.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:end}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:#777}.hero h1{font-size:64px;line-height:1.03;margin:12px 0 18px;letter-spacing:-.045em}.hero p{font-size:19px;line-height:1.7;color:#666;max-width:760px}.card{background:#ece6da;border:1px solid #d6d0c7;border-radius:28px;padding:26px}.tags span,.filters button{display:inline-block;border:1px solid #ccc;border-radius:999px;padding:9px 13px;margin:4px;background:#fff}.section{border-top:1px solid #ddd}.section h2{font-size:40px;margin:8px 0 30px}.filters{margin-bottom:26px}.stage-legend{font-size:13px;color:#888;margin:-14px 0 22px}.filters button{cursor:pointer}.filters button.active{background:#191a1c;color:#fff}.post{display:grid;grid-template-columns:220px 1fr;border:1px solid #ddd;background:#fff;border-radius:24px;overflow:hidden;margin:16px 0;text-decoration:none;color:inherit}.post .visual{min-height:180px;background:#111315;position:relative;overflow:hidden}.post .visual:not(:has(img)):after{content:"";position:absolute;inset:25% 15%;border-radius:50%;background:radial-gradient(circle,#66d9ef55,transparent 60%)}.post .visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.post .content{padding:24px}.meta{font-size:12px;color:#777}.post h3{font-size:26px;margin:12px 0}.post p{color:#666;line-height:1.6}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.topic{border:1px solid #ddd;background:#fbf9f4;border-radius:24px;padding:22px;overflow:hidden}.topic h3{margin-top:5px}.topic li{margin:8px 0;color:#666;font-size:14px}.topic-img{display:block;width:calc(100% + 44px);height:110px;object-fit:cover;margin:-22px -22px 16px}.hero-figure{max-width:1180px;margin:0 auto;padding:10px 28px 0}.hero-figure img{width:100%;max-height:420px;object-fit:cover;border-radius:28px;display:block}.hero-figure figcaption{font-size:12px;color:#999;margin-top:8px;text-align:right}.hero-figure figcaption a{color:#999}.map{height:500px;background:#111315;border-radius:28px;position:relative;overflow:hidden}.life{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.life .card{background:#fff}.life a.card{text-decoration:none;color:inherit;display:block}.muted{color:#777}.footer{background:#191a1c;color:#fff;padding:35px 28px;margin-top:60px}.footer div{max-width:1180px;margin:auto}.footer a{color:#aaa}.prose{max-width:760px}.prose h1{font-size:44px;line-height:1.1;letter-spacing:-.03em;margin:14px 0 24px}.prose p{font-size:18px;line-height:1.75;color:#333;margin:0 0 22px}.prose h2{font-size:26px;margin:40px 0 14px}.prose ul,.prose ol{font-size:18px;line-height:1.75;color:#333;padding-left:22px}.prose li{margin:0 0 10px}.prose code{background:#ece6da;border-radius:5px;padding:2px 6px;font-size:15px}.prose a{color:#191a1c}.back-link{font-size:14px;color:#444;text-decoration:none}
+@media(max-width:850px){.hero,.post,.grid,.life{grid-template-columns:1fr}.hero h1{font-size:46px}.desktop-nav{display:none}.mobile-nav{display:block;position:relative}.mobile-nav summary{cursor:pointer;list-style:none;border:1px solid #ccc;border-radius:10px;padding:8px 11px}.mobile-nav summary::-webkit-details-marker{display:none}.mobile-menu{position:absolute;right:0;top:43px;width:230px;background:#fff;border:1px solid #ddd;border-radius:14px;padding:8px;box-shadow:0 14px 35px #0002}.mobile-menu a{display:block;padding:10px;color:#333;text-decoration:none;border-radius:8px}.mobile-menu a:hover{background:#f3efe7}.map{height:430px}}
+</style></head><body>
+<header><a class="brand" href="/"><strong>Maheswaran <span class="muted">· Field Notebook</span></strong></a>
+<nav class="desktop-nav" aria-label="Primary navigation">
+<a href="/writings/">Writings</a>
+<details class="nav-group"><summary>Explore</summary><div class="nav-menu"><a href="/explorations/">Explorations & workbench</a><a href="/#map">Knowledge Map</a></div></details>
+<details class="nav-group"><summary>Life</summary><div class="nav-menu"><a href="/life/">Life archive</a><a href="/writings/?tag=Movies">Movies & reflections</a><a href="/writings/?tag=Books">Books & notes</a></div></details>
+</nav>
+<details class="mobile-nav"><summary aria-label="Open navigation">Menu</summary><div class="mobile-menu"><a href="/writings/">Writings</a><a href="/explorations/">Explorations</a><a href="/#map">Knowledge Map</a><a href="/life/">Life</a><a href="/writings/?tag=Movies">Movies & reflections</a></div></details>
+</header><main><slot/></main><footer class="footer"><div><strong>Maheswaran</strong><br/><span style="color:#aaa">Engineering · computation · explorations · life</span><br/><span style="font-size:13px;color:#aaa">Thoughts and discussion are welcome on each writing.</span><br/><a href="/rss.xml" style="font-size:13px">RSS</a></div></footer></body></html>
