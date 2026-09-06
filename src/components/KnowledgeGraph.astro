@@ -1,257 +1,109 @@
 ---
-// Renders the Knowledge Map as a real graph: one hub node per category, one
-// leaf node per article, edges connecting article -> category. Layout is an
-// anchored radial fan computed here at build time (hubs evenly spaced on a
-// ring, each hub's articles fanned around it) - client-side physics only
-// adds a light spring-to-anchor + gentle repulsion for an organic settle and
-// draggability, it does not decide the overall structure. That's what makes
-// this version stable instead of everything drifting into one clump.
+// Knowledge map hierarchy: ordered tags become a path to each article.
+// Example: Movies → Hidden Figures → article. Untagged posts fall back to
+// their broad content category so older entries remain visible.
 interface Post {
   id: string;
-  data: { title: string; category: string; stage: 'seedling' | 'budding' | 'evergreen' };
+  data: {
+    title: string;
+    category: string;
+    tags?: string[];
+    stage: 'seedling' | 'budding' | 'evergreen';
+  };
 }
-interface Props {
-  posts: Post[];
-}
+interface Props { posts: Post[]; }
 const { posts } = Astro.props;
 
 const categoryLabels: Record<string, string> = {
-  physics: 'Physics',
-  computation: 'Computation',
-  experiments: 'Experiments',
-  journeys: 'Journeys',
-  books: 'Books & Films',
+  physics: 'Physics', computation: 'Computation', experiments: 'Experiments',
+  journeys: 'Journeys', books: 'Books & Films',
 };
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const pathFor = (p: Post) => p.data.tags?.length ? p.data.tags : [categoryLabels[p.data.category] ?? p.data.category];
+const roots = [...new Set(posts.map((p) => pathFor(p)[0]))];
+const W = 1000, H = 540, cx = W / 2, cy = H / 2;
+const rootRadius = 115, branchRadius = 205, leafRadius = 255;
+const rootAngle: Record<string, number> = {};
+roots.forEach((r, i) => rootAngle[r] = (i / Math.max(roots.length, 1)) * Math.PI * 2 - Math.PI / 2);
 
-const W = 1000, H = 460;
-const cx = W / 2, cy = H / 2;
-const hubRadius = 110;
-const leafRadius = 200;
+type Node = { id:string; label:string; kind:'root'|'tag'|'article'; href:string|null; stage:string|null; ax:number; ay:number };
+const nodeMap = new Map<string, Node>();
+const edges: {source:string; target:string}[] = [];
 
-const categoriesUsed = [...new Set(posts.map((p) => p.data.category))];
-const hubAngle: Record<string, number> = {};
-categoriesUsed.forEach((c, i) => {
-  hubAngle[c] = (i / categoriesUsed.length) * Math.PI * 2 - Math.PI / 2;
-});
+roots.forEach((r) => nodeMap.set(`tag:${slug(r)}`, {
+  id:`tag:${slug(r)}`, label:r, kind:'root', href:null, stage:null,
+  ax:cx + Math.cos(rootAngle[r]) * rootRadius, ay:cy + Math.sin(rootAngle[r]) * rootRadius,
+}));
 
-const byCategory: Record<string, Post[]> = {};
-categoriesUsed.forEach((c) => (byCategory[c] = []));
-posts.forEach((p) => byCategory[p.data.category].push(p));
+roots.forEach((root) => {
+  const rootPosts = posts.filter((p) => pathFor(p)[0] === root);
+  rootPosts.forEach((p, pi) => {
+    const path = pathFor(p);
+    let parent = `tag:${slug(root)}`;
+    const spread = Math.min(1.25, .28 * Math.max(rootPosts.length, 2));
+    const offset = rootPosts.length > 1 ? (pi / (rootPosts.length - 1) - .5) * spread : 0;
+    const angle = rootAngle[root] + offset;
 
-const nodes = [
-  ...categoriesUsed.map((c) => ({
-    id: `cat:${c}`,
-    label: categoryLabels[c] ?? c,
-    hub: true,
-    href: null as string | null,
-    stage: null as string | null,
-    ax: cx + Math.cos(hubAngle[c]) * hubRadius,
-    ay: cy + Math.sin(hubAngle[c]) * hubRadius,
-  })),
-  ...categoriesUsed.flatMap((c) => {
-    const arr = byCategory[c];
-    const spread = Math.min(1.1, 0.4 * arr.length);
-    return arr.map((p, i) => {
-      const t = arr.length > 1 ? i / (arr.length - 1) - 0.5 : 0;
-      const angle = hubAngle[c] + t * spread;
-      return {
-        id: p.id,
-        label: p.data.title,
-        hub: false,
-        href: `/writings/${p.id}/`,
-        stage: p.data.stage as string | null,
-        ax: cx + Math.cos(angle) * leafRadius,
-        ay: cy + Math.sin(angle) * leafRadius,
-      };
+    path.slice(1).forEach((tag, depth) => {
+      const id = `${parent}/${slug(tag)}`;
+      if (!nodeMap.has(id)) nodeMap.set(id, {
+        id, label:tag, kind:'tag', href:null, stage:null,
+        ax:cx + Math.cos(angle) * (branchRadius + depth * 28),
+        ay:cy + Math.sin(angle) * (branchRadius + depth * 28),
+      });
+      if (!edges.some((e) => e.source === parent && e.target === id)) edges.push({source:parent,target:id});
+      parent = id;
     });
-  }),
-];
 
-const edges = posts.map((p) => ({ source: p.id, target: `cat:${p.data.category}` }));
-
+    nodeMap.set(p.id, {
+      id:p.id, label:p.data.title, kind:'article', href:`/writings/${p.id}/`, stage:p.data.stage,
+      ax:cx + Math.cos(angle) * leafRadius, ay:cy + Math.sin(angle) * leafRadius,
+    });
+    edges.push({source:parent,target:p.id});
+  });
+});
+const nodes = [...nodeMap.values()];
 const graphJson = JSON.stringify({ nodes, edges, W, H }).replace(/</g, '\\u003c');
 ---
 <div class="map" id="knowledge-map">
-  <svg id="kg-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge map — click a node to open that entry"></svg>
-  <p class="kg-hint">Drag to explore, click a node to open it. 🌱🌿🌳 rings show how settled each idea is.</p>
+  <svg id="kg-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Knowledge map — topics connect to subjects and writings"></svg>
+  <p class="kg-hint">Follow a path from topic → subject → writing. Drag to explore; click a writing to open it. 🌱🌿🌳 rings show maturity.</p>
 </div>
 <script type="application/json" id="kg-data" set:html={graphJson} />
-
 <script>
   const dataEl = document.getElementById('kg-data');
   const svg = document.getElementById('kg-svg') as unknown as SVGSVGElement | null;
   if (dataEl && svg) {
     const { nodes, edges, W, H } = JSON.parse(dataEl.textContent || '{}') as {
-      nodes: { id: string; label: string; hub: boolean; href: string | null; stage: string | null; ax: number; ay: number }[];
-      edges: { source: string; target: string }[];
-      W: number;
-      H: number;
+      nodes:{id:string;label:string;kind:'root'|'tag'|'article';href:string|null;stage:string|null;ax:number;ay:number}[];
+      edges:{source:string;target:string}[]; W:number; H:number;
     };
-
-    type SimNode = (typeof nodes)[number] & {
-      x: number; y: number; vx: number; vy: number; r: number; fixed?: boolean;
-    };
-
-    const simNodes = nodes as SimNode[];
-    const stageColor: Record<string, string> = {
-      seedling: '#9fcf7f',
-      budding: '#5b9a5b',
-      evergreen: '#2f6b3f',
-    };
-
-    simNodes.forEach((n) => {
-      n.x = n.ax + (Math.random() - 0.5) * 10;
-      n.y = n.ay + (Math.random() - 0.5) * 10;
-      n.vx = 0;
-      n.vy = 0;
-      n.r = n.hub ? 12 : 7;
-    });
-
-    const byId = Object.fromEntries(simNodes.map((n) => [n.id, n]));
-    const links = edges
-      .map((e) => ({ source: byId[e.source], target: byId[e.target] }))
-      .filter((l) => l.source && l.target);
-
-    function tick() {
-      // short-range repulsion: only enough to keep close neighbours from overlapping
-      for (let i = 0; i < simNodes.length; i++) {
-        for (let j = i + 1; j < simNodes.length; j++) {
-          const a = simNodes[i], b = simNodes[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const distSq = dx * dx + dy * dy || 0.01;
-          const dist = Math.sqrt(distSq);
-          if (dist < 70) {
-            const force = 260 / distSq;
-            const fx = (dx / dist) * force, fy = (dy / dist) * force;
-            if (!a.fixed) { a.vx += fx; a.vy += fy; }
-            if (!b.fixed) { b.vx -= fx; b.vy -= fy; }
-          }
-        }
+    type SimNode=(typeof nodes)[number]&{x:number;y:number;vx:number;vy:number;r:number;fixed?:boolean};
+    const simNodes=nodes as SimNode[];
+    const stageColor:Record<string,string>={seedling:'#9fcf7f',budding:'#5b9a5b',evergreen:'#2f6b3f'};
+    simNodes.forEach(n=>{n.x=n.ax+(Math.random()-.5)*8;n.y=n.ay+(Math.random()-.5)*8;n.vx=0;n.vy=0;n.r=n.kind==='root'?13:n.kind==='tag'?9:7});
+    const byId=Object.fromEntries(simNodes.map(n=>[n.id,n]));
+    const links=edges.map(e=>({source:byId[e.source],target:byId[e.target]})).filter(l=>l.source&&l.target);
+    function tick(){
+      for(let i=0;i<simNodes.length;i++)for(let j=i+1;j<simNodes.length;j++){
+        const a=simNodes[i],b=simNodes[j],dx=a.x-b.x,dy=a.y-b.y,ds=dx*dx+dy*dy||.01,d=Math.sqrt(ds);
+        if(d<76){const f=280/ds,fx=dx/d*f,fy=dy/d*f;if(!a.fixed){a.vx+=fx;a.vy+=fy}if(!b.fixed){b.vx-=fx;b.vy-=fy}}
       }
-      // the structure itself comes from a spring back to each node's fixed
-      // radial anchor, not from repulsion/centering - that's what keeps hubs
-      // and their articles from drifting into one central clump
-      simNodes.forEach((n) => {
-        if (n.fixed) return;
-        n.vx += (n.ax - n.x) * 0.06;
-        n.vy += (n.ay - n.y) * 0.06;
-        n.vx *= 0.78;
-        n.vy *= 0.78;
-        n.x += n.vx;
-        n.y += n.vy;
-      });
+      simNodes.forEach(n=>{if(n.fixed)return;n.vx+=(n.ax-n.x)*.06;n.vy+=(n.ay-n.y)*.06;n.vx*=.78;n.vy*=.78;n.x+=n.vx;n.y+=n.vy});
     }
-
-    const svgns = 'http://www.w3.org/2000/svg';
-    const linkEls = links.map(() => {
-      const line = document.createElementNS(svgns, 'line');
-      line.setAttribute('stroke', '#3a3d42');
-      line.setAttribute('stroke-width', '1');
-      svg.appendChild(line);
-      return line;
-    });
-    const nodeGroups = simNodes.map((n) => {
-      const g = document.createElementNS(svgns, 'g');
-      (g as unknown as HTMLElement).style.cursor = n.href ? 'pointer' : 'default';
-      const circle = document.createElementNS(svgns, 'circle');
-      circle.setAttribute('r', String(n.r));
-      circle.setAttribute('fill', n.hub ? '#fbbf24' : '#fff');
-      circle.setAttribute('stroke', n.hub ? 'none' : n.stage ? stageColor[n.stage] : '#00000022');
-      circle.setAttribute('stroke-width', n.hub ? '0' : '2.5');
-      g.appendChild(circle);
-      const text = document.createElementNS(svgns, 'text');
-      text.textContent = n.hub ? n.label : n.label.length > 34 ? n.label.slice(0, 32) + '…' : n.label;
-      text.setAttribute('font-size', n.hub ? '14' : '10.5');
-      text.setAttribute('font-weight', n.hub ? '700' : '400');
-      text.setAttribute('fill', n.hub ? '#fff' : '#d8d8d8');
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('dy', n.hub ? '-18' : '-12');
-      g.appendChild(text);
-      svg.appendChild(g);
-      return g;
-    });
-
-    function render() {
-      links.forEach((l, i) => {
-        const line = linkEls[i];
-        line.setAttribute('x1', String(l.source.x));
-        line.setAttribute('y1', String(l.source.y));
-        line.setAttribute('x2', String(l.target.x));
-        line.setAttribute('y2', String(l.target.y));
-      });
-      simNodes.forEach((n, i) => {
-        nodeGroups[i].setAttribute('transform', `translate(${n.x},${n.y})`);
-      });
-    }
-
-    let ticks = 0;
-    function loop() {
-      tick();
-      render();
-      ticks++;
-      if (ticks < 140) requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-
-    let dragNode: SimNode | null = null;
-    let dragged = false;
-    let startX = 0, startY = 0;
-
-    function svgPoint(evt: PointerEvent) {
-      const rect = svg!.getBoundingClientRect();
-      return {
-        x: ((evt.clientX - rect.left) / rect.width) * W,
-        y: ((evt.clientY - rect.top) / rect.height) * H,
-      };
-    }
-
-    nodeGroups.forEach((g, i) => {
-      g.addEventListener('pointerdown', (e) => {
-        dragNode = simNodes[i];
-        dragged = false;
-        startX = e.clientX;
-        startY = e.clientY;
-        dragNode.fixed = true;
-        ticks = Math.max(0, ticks - 60);
-        requestAnimationFrame(loop);
-        e.preventDefault();
-      });
-    });
-    window.addEventListener('pointermove', (e) => {
-      if (!dragNode) return;
-      if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) dragged = true;
-      const p = svgPoint(e);
-      dragNode.x = p.x;
-      dragNode.y = p.y;
-      dragNode.vx = 0;
-      dragNode.vy = 0;
-      render();
-    });
-    window.addEventListener('pointerup', () => {
-      if (dragNode) {
-        const n = dragNode;
-        n.fixed = false;
-        ticks = Math.max(0, ticks - 40);
-        requestAnimationFrame(loop);
-        if (!dragged && n.href) {
-          window.location.href = n.href;
-        }
-        dragNode = null;
-      }
-    });
+    const ns='http://www.w3.org/2000/svg';
+    const linkEls=links.map(()=>{const l=document.createElementNS(ns,'line');l.setAttribute('stroke','#3a3d42');l.setAttribute('stroke-width','1');svg.appendChild(l);return l});
+    const groups=simNodes.map(n=>{const g=document.createElementNS(ns,'g');(g as unknown as HTMLElement).style.cursor=n.href?'pointer':'default';
+      const c=document.createElementNS(ns,'circle');c.setAttribute('r',String(n.r));c.setAttribute('fill',n.kind==='root'?'#fbbf24':n.kind==='tag'?'#d9a441':'#fff');c.setAttribute('stroke',n.kind==='article'&&n.stage?stageColor[n.stage]:'#00000022');c.setAttribute('stroke-width',n.kind==='article'?'2.5':'0');g.appendChild(c);
+      const t=document.createElementNS(ns,'text');t.textContent=n.label.length>34?n.label.slice(0,32)+'…':n.label;t.setAttribute('font-size',n.kind==='root'?'14':n.kind==='tag'?'12':'10.5');t.setAttribute('font-weight',n.kind==='article'?'400':'700');t.setAttribute('fill',n.kind==='article'?'#d8d8d8':'#fff');t.setAttribute('text-anchor','middle');t.setAttribute('dy',n.kind==='root'?'-20':'-14');g.appendChild(t);svg.appendChild(g);return g});
+    function render(){links.forEach((l,i)=>{const e=linkEls[i];e.setAttribute('x1',String(l.source.x));e.setAttribute('y1',String(l.source.y));e.setAttribute('x2',String(l.target.x));e.setAttribute('y2',String(l.target.y))});simNodes.forEach((n,i)=>groups[i].setAttribute('transform',`translate(${n.x},${n.y})`))}
+    let ticks=0;function loop(){tick();render();ticks++;if(ticks<140)requestAnimationFrame(loop)}requestAnimationFrame(loop);
+    let drag:SimNode|null=null,moved=false,sx=0,sy=0;function point(e:PointerEvent){const r=svg!.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}}
+    groups.forEach((g,i)=>g.addEventListener('pointerdown',e=>{drag=simNodes[i];moved=false;sx=e.clientX;sy=e.clientY;drag.fixed=true;ticks=Math.max(0,ticks-60);requestAnimationFrame(loop);e.preventDefault()}));
+    window.addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientX-sx)>3||Math.abs(e.clientY-sy)>3)moved=true;const p=point(e);drag.x=p.x;drag.y=p.y;drag.vx=drag.vy=0;render()});
+    window.addEventListener('pointerup',()=>{if(!drag)return;const n=drag;n.fixed=false;ticks=Math.max(0,ticks-40);requestAnimationFrame(loop);if(!moved&&n.href)window.location.href=n.href;drag=null});
   }
 </script>
-
 <style>
-  .kg-hint {
-    text-align: center;
-    font-size: 12px;
-    color: #777;
-    margin: 10px 0 0;
-  }
-  #kg-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
+  .kg-hint{text-align:center;font-size:12px;color:#777;margin:10px 0 0}#kg-svg{width:100%;height:100%;display:block}
 </style>
