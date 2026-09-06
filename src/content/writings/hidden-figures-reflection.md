@@ -5,6 +5,7 @@ category: journeys
 categoryLabel: "Films & reflections"
 meta: "Film reflection · career · learning · leadership"
 excerpt: "A personal reflection on Hidden Figures — on learning before change forces us to, being seen beyond our labels, leadership, community, family, and what a meaningful career might finally mean."
+tags: ["Movies", "Hidden Figures"]
 stage: budding
 draft: false
 cover: "https://lumiere-a.akamaihd.net/v1/images/image_da658494.jpeg?region=0%2C0%2C1800%2C776"
