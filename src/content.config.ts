@@ -10,17 +10,11 @@ const writings = defineCollection({
     categoryLabel: z.string(),
     meta: z.string(),
     excerpt: z.string(),
-    // Digital-garden growth stage - how settled the idea is, independent of
-    // publish date. seedling: a rough note or open question. budding: worked
-    // out and useful, but could still be revised. evergreen: revisited more
-    // than once and holding up.
+    // Optional topic tags used to build a richer knowledge map. For example,
+    // a film reflection can connect through "Movies" to "Hidden Figures".
+    tags: z.array(z.string()).default([]),
     stage: z.enum(['seedling', 'budding', 'evergreen']).default('seedling'),
-    // Work-in-progress: keep the file in the repo but out of the build.
     draft: z.boolean().default(false),
-    // Optional cover image. Put the file in public/images/ and use an absolute
-    // path like "/images/foo.jpg". Shown on the post card, the article header,
-    // and as the social-share (Open Graph) image. Credit line is required for
-    // anything not your own - see CREDITS.md.
     cover: z.string().optional(),
     coverAlt: z.string().optional(),
     coverCredit: z.string().optional(),
