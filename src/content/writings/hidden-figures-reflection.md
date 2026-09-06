@@ -215,7 +215,37 @@ The terminology itself feels like a small time machine.
 
 "Computers" were once people performing calculations. Programming was emerging. Computational resources were precious. Calculations that can now be performed in seconds demanded enormous human effort.
 
+![A woman working as a human computer at NACA Langley in 1952, using an optical instrument beside a Friden calculating machine.](https://upload.wikimedia.org/wikipedia/commons/b/be/X-4_with_Female_Computer_-_GPN-2000-001932.jpg)
+
+*An original 1952 NACA/NASA Langley photograph: a human “computer” collecting data beside a Friden calculating machine. NASA image; public-domain U.S. government work. [NASA's history of Langley's human computers](https://www.nasa.gov/history/langleys-computers-1935-1970/).*
+
+That word is worth pausing on. **Computer was a job before it became a machine.** At Langley, these mathematicians read experimental data, performed calculations and plotted results by hand, supported by slide rules and mechanical calculators. The machine did not replace the meaning of computation overnight; the meaning itself migrated from people to electronics.
+
+Then came machines such as the **IBM 7090**, one of the systems used in NASA's Mercury-era computing infrastructure.
+
+![NASA computer room with dual IBM 7090 mainframes, 1962.](https://commons.wikimedia.org/wiki/Special:FilePath/NASAComputerRoom7090.NARA.jpg)
+
+*Original NASA computer-room photograph, 1962, showing dual IBM 7090 systems. U.S. National Archives / NASA, NAID 278195; public domain. [Archival record and image details](https://commons.wikimedia.org/wiki/File:NASAComputerRoom7090.NARA.jpg).*
+
+### From a computer room to a pocket
+
+I find this comparison almost difficult to believe:
+
+| | IBM 7090 — early 1960s | A representative modern flagship smartphone |
+|---|---|---|
+| Computing form | Room-scale mainframe installation | Handheld system-on-chip |
+| Word / processor | 36-bit architecture | 64-bit multi-core CPU with GPU and AI/NPU accelerators |
+| Main memory | 32,768 × 36-bit words — about **144 KiB** | Typically **8–16 GB RAM** |
+| Storage / data | Magnetic tape, punched-card and peripheral systems | Typically **128 GB–1 TB flash storage** |
+| Fixed-point add/subtract | About **227,000 operations/s** | Billions of low-level operations/s; exact throughput varies by chip and workload |
+| Programming | FORTRAN and assembly-era workflows | Apps plus modern languages, cloud services and on-device AI |
+| Physical experience | A facility you went to | Roughly 0.2 kg in your pocket |
+
+*The IBM figures are based on IBM 7090 documentation; smartphone figures are deliberately representative rather than tied to one brand or model. It is not a benchmark-equivalent comparison — architectures and workloads are fundamentally different. The point is the scale of the change.*
+
 Today, we casually work with computational power that engineers of that era could hardly have imagined — simulation, high-performance computing, optimization, machine learning and AI.
+
+And that is what makes Dorothy's response to technological change feel surprisingly current to me. The machine changes. The tools change. The question remains: **do we learn early enough to move with them?**
 
 Sometimes watching the movie made me appreciate how far the engineering world has travelled.
 
