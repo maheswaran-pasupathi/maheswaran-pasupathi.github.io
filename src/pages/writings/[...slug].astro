@@ -2,71 +2,23 @@
 import Base from '../../layouts/Base.astro';
 import StageBadge from '../../components/StageBadge.astro';
 import { getCollection, render } from 'astro:content';
-
-export async function getStaticPaths() {
-  const posts = await getCollection('writings', ({ data }) => !data.draft);
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
-}
-
-const { post } = Astro.props;
-const { Content, headings } = await render(post);
-const pageUrl = new URL(`/writings/${post.id}/`, Astro.site).toString();
-const linkedinShare = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
-const githubDiscussion = `https://github.com/maheswaran-pasupathi/maheswaran-pasupathi.github.io/issues/new?title=${encodeURIComponent(`Thoughts: ${post.data.title}`)}&body=${encodeURIComponent(`I read: ${pageUrl}\n\nMy thoughts:\n`)}`;
+export async function getStaticPaths(){const posts=await getCollection('writings',({data})=>!data.draft);return posts.map(post=>({params:{slug:post.id},props:{post}}))}
+const {post}=Astro.props;const {Content,headings}=await render(post);const pageUrl=new URL(`/writings/${post.id}/`,Astro.site).toString();
+const linkedinShare=`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+const emailShare=`mailto:?subject=${encodeURIComponent(post.data.title)}&body=${encodeURIComponent(`I thought you might find this interesting:\n\n${pageUrl}`)}`;
+const githubDiscussion=`https://github.com/maheswaran-pasupathi/maheswaran-pasupathi.github.io/issues/new?title=${encodeURIComponent(`Thoughts: ${post.data.title}`)}&body=${encodeURIComponent(`I read: ${pageUrl}\n\nMy thoughts:\n`)}`;
 ---
 <Base title={`${post.data.title} — Maheswaran`} description={post.data.excerpt} type="article" image={post.data.cover}>
-  <article class="wrap prose">
-    <p><a class="back-link" href="/writings/">← All writings</a></p>
-    <div class="eyebrow">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
-    <h1>{post.data.title}</h1>
-
-    {headings.length > 1 && (
-      <details class="article-toc">
-        <summary>In this reflection <span>{headings.length} sections</span></summary>
-        <nav aria-label="Article sections">
-          {headings.filter((h) => h.depth === 2).map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
-        </nav>
-      </details>
-    )}
-
-    {post.data.cover && (
-      <figure class="post-cover">
-        <img src={post.data.cover} alt={post.data.coverAlt ?? ''} />
-        {post.data.coverCredit && <figcaption>{post.data.coverCreditUrl ? <a href={post.data.coverCreditUrl}>{post.data.coverCredit}</a> : post.data.coverCredit}</figcaption>}
-      </figure>
-    )}
-
-    <Content />
-
-    <aside class="discuss" aria-label="Discuss and share this article">
-      <div class="eyebrow">Continue the conversation</div>
-      <h2>What did this leave you thinking about?</h2>
-      <p>I write these notes to start conversations, not end them. If something here connects with your experience — or you see it differently — I would like to hear your perspective.</p>
-      <div class="discussion-actions">
-        <a class="action primary" href={githubDiscussion} target="_blank" rel="noopener noreferrer">💬 Leave a thought</a>
-        <a class="action" href={linkedinShare} target="_blank" rel="noopener noreferrer">↗ Share on LinkedIn</a>
-        <button class="action" id="copy-link" type="button">⧉ Copy article link</button>
-      </div>
-      <p class="contact-note">Prefer a private conversation? Connect with me on <a href="https://www.linkedin.com/in/maheswaran-pasupathi/" target="_blank" rel="noopener noreferrer">LinkedIn</a>. I will add a direct email option here once a public contact address is configured for the site.</p>
-    </aside>
-
-    <p style="margin-top:42px"><a class="back-link" href="/writings/">← All writings</a></p>
-  </article>
-
-  <script>
-    const copyButton = document.querySelector('#copy-link');
-    copyButton?.addEventListener('click', async () => {
-      await navigator.clipboard.writeText(window.location.href);
-      const oldText = copyButton.textContent;
-      copyButton.textContent = '✓ Link copied';
-      setTimeout(() => { copyButton.textContent = oldText; }, 1800);
-    });
-  </script>
+<article class="wrap prose"><p><a class="back-link" href="/writings/">← All writings</a></p><div class="eyebrow">{post.data.meta}<StageBadge stage={post.data.stage}/></div><h1>{post.data.title}</h1>
+{post.data.tags?.length>0&&<div class="article-tags" aria-label="Topics">{post.data.tags.map((tag:string)=><a href={`/writings/?tag=${encodeURIComponent(tag)}`}>{tag}</a>)}</div>}
+{headings.length>1&&<details class="article-toc"><summary>In this reflection <span>{headings.filter(h=>h.depth===2).length} sections</span></summary><nav aria-label="Article sections">{headings.filter(h=>h.depth===2).map(h=><a href={`#${h.slug}`}>{h.text}</a>)}</nav></details>}
+{post.data.cover&&<figure class="post-cover"><img src={post.data.cover} alt={post.data.coverAlt??''}/>{post.data.coverCredit&&<figcaption>{post.data.coverCreditUrl?<a href={post.data.coverCreditUrl}>{post.data.coverCredit}</a>:post.data.coverCredit}</figcaption>}</figure>}
+<Content/>
+<aside class="discuss" aria-label="Discuss and share this article"><div class="eyebrow">Continue the conversation</div><h2>What did this leave you thinking about?</h2><p>I write these notes to start conversations, not end them. If something here connects with your experience — or you see it differently — I would like to hear your perspective.</p><div class="discussion-actions"><a class="action primary" href={githubDiscussion} target="_blank" rel="noopener noreferrer">💬 Leave a thought</a><a class="action" href={linkedinShare} target="_blank" rel="noopener noreferrer">↗ Share on LinkedIn</a><a class="action" href={emailShare}>✉ Share by email</a><button class="action" id="copy-link" type="button">⧉ Copy article link</button></div><p class="contact-note">For now, public discussion can continue through the “Leave a thought” link above. A direct author email/contact link will be added only after a public contact address is configured for this site.</p></aside>
+<p style="margin-top:42px"><a class="back-link" href="/writings/">← All writings</a></p></article>
+<script>const b=document.querySelector('#copy-link');b?.addEventListener('click',async()=>{await navigator.clipboard.writeText(window.location.href);const old=b.textContent;b.textContent='✓ Link copied';setTimeout(()=>{b.textContent=old},1800)})</script>
 </Base>
-
 <style>
-  .post-cover{margin:24px 0 34px}.post-cover img{width:100%;max-height:380px;object-fit:cover;border-radius:18px;display:block}.post-cover figcaption{font-size:12px;color:#999;margin-top:8px}.post-cover figcaption a{color:#777}
-  .article-toc{margin:26px 0 28px;border:1px solid #d8d1c5;border-radius:16px;background:#fff;padding:0 18px}.article-toc summary{cursor:pointer;font-weight:700;padding:16px 0;list-style:none}.article-toc summary::-webkit-details-marker{display:none}.article-toc summary:after{content:'＋';float:right;color:#777}.article-toc[open] summary:after{content:'−'}.article-toc summary span{font-weight:400;color:#888;font-size:13px;margin-left:8px}.article-toc nav{display:grid;grid-template-columns:1fr 1fr;gap:7px 22px;border-top:1px solid #eee;padding:14px 0 18px}.article-toc nav a{font-size:14px;line-height:1.4;text-decoration:none;color:#555}.article-toc nav a:hover{text-decoration:underline;color:#111}
-  .discuss{margin-top:58px;padding:28px;border:1px solid #d6d0c7;border-radius:24px;background:#ece6da}.discuss h2{font-size:28px;margin:9px 0 12px}.discuss p{font-size:16px;line-height:1.65;margin-bottom:18px}.discussion-actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.action{appearance:none;border:1px solid #bbb;background:#fff;color:#191a1c!important;text-decoration:none!important;border-radius:999px;padding:11px 16px;font:inherit;font-size:14px;cursor:pointer}.action.primary{background:#191a1c;color:#fff!important;border-color:#191a1c}.contact-note{border-top:1px solid #d2cabd;padding-top:17px;margin-top:20px!important;color:#666!important}
-  @media(max-width:650px){.article-toc nav{grid-template-columns:1fr}.discuss{padding:22px}.discussion-actions{flex-direction:column}.action{text-align:center}}
+.post-cover{margin:24px 0 34px}.post-cover img{width:100%;max-height:380px;object-fit:cover;border-radius:18px;display:block}.post-cover figcaption{font-size:12px;color:#999;margin-top:8px}.post-cover figcaption a{color:#777}.article-tags{display:flex;gap:7px;flex-wrap:wrap;margin:-8px 0 22px}.article-tags a{font-size:12px;text-decoration:none;border:1px solid #d2cabd;background:#fff;border-radius:999px;padding:6px 10px;color:#666}.article-toc{margin:26px 0 28px;border:1px solid #d8d1c5;border-radius:16px;background:#fff;padding:0 18px}.article-toc summary{cursor:pointer;font-weight:700;padding:16px 0;list-style:none}.article-toc summary::-webkit-details-marker{display:none}.article-toc summary:after{content:'＋';float:right;color:#777}.article-toc[open] summary:after{content:'−'}.article-toc summary span{font-weight:400;color:#888;font-size:13px;margin-left:8px}.article-toc nav{display:grid;grid-template-columns:1fr 1fr;gap:7px 22px;border-top:1px solid #eee;padding:14px 0 18px}.article-toc nav a{font-size:14px;line-height:1.4;text-decoration:none;color:#555}.article-toc nav a:hover{text-decoration:underline;color:#111}.discuss{margin-top:58px;padding:28px;border:1px solid #d6d0c7;border-radius:24px;background:#ece6da}.discuss h2{font-size:28px;margin:9px 0 12px}.discuss p{font-size:16px;line-height:1.65;margin-bottom:18px}.discussion-actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.action{appearance:none;border:1px solid #bbb;background:#fff;color:#191a1c!important;text-decoration:none!important;border-radius:999px;padding:11px 16px;font:inherit;font-size:14px;cursor:pointer}.action.primary{background:#191a1c;color:#fff!important;border-color:#191a1c}.contact-note{border-top:1px solid #d2cabd;padding-top:17px;margin-top:20px!important;color:#666!important}.prose :global(table){width:100%;border-collapse:collapse;margin:22px 0 30px;font-size:14px}.prose :global(th),.prose :global(td){text-align:left;vertical-align:top;border-bottom:1px solid #ddd;padding:10px 8px}.prose :global(th){font-size:12px;color:#666}.prose :global(p>img){width:100%;border-radius:18px;display:block;margin-top:28px}
+@media(max-width:650px){.article-toc nav{grid-template-columns:1fr}.discuss{padding:22px}.discussion-actions{flex-direction:column}.action{text-align:center}.prose :global(table){display:block;overflow-x:auto}}
 </style>
