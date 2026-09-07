@@ -37,32 +37,47 @@ const posts = allPosts.slice(0, 4);
     </figure>
   )}
 
-  <section id="latest" class="section">
-    <div class="wrap">
-      <div class="eyebrow">Fresh entries</div>
-      <h2>Latest from the Garden</h2>
-      <p class="stage-legend">🌱 Seedling — a rough note or open question &nbsp;·&nbsp; 🌿 Budding — worked out, could still change &nbsp;·&nbsp; 🌳 Evergreen — revisited and holding up</p>
-      <div class="filters">
-        <button class="active" data-filter="all">Everything</button>
-        <button data-filter="physics">Physics</button>
-        <button data-filter="computation">Computation</button>
-        <button data-filter="experiments">Experiments</button>
-        <button data-filter="journeys">Journeys</button>
-        <button data-filter="books">Books & Films</button>
+  <section id="latest" class="section garden-dashboard">
+    <div class="wrap garden-columns">
+      <div class="latest-column">
+        <div class="eyebrow">Fresh entries</div>
+        <h2>Latest from the Garden</h2>
+        <p class="stage-legend">🌱 Seedling — a rough note or open question &nbsp;·&nbsp; 🌿 Budding — worked out, could still change &nbsp;·&nbsp; 🌳 Evergreen — revisited and holding up</p>
+        <div class="filters">
+          <button class="active" data-filter="all">Everything</button>
+          <button data-filter="physics">Physics</button>
+          <button data-filter="computation">Computation</button>
+          <button data-filter="experiments">Experiments</button>
+          <button data-filter="journeys">Journeys</button>
+          <button data-filter="books">Books & Films</button>
+        </div>
+        <div class="home-posts">
+          {posts.map((post) => (
+            <a class="post home-post" data-cat={post.data.category} href={`/writings/${post.id}/`}>
+              <div class="visual">
+                {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />}
+              </div>
+              <div class="content">
+                <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
+                <h3>{post.data.title}</h3>
+                <p>{post.data.excerpt}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+        <p><a class="back-link" href="/writings/">All writings →</a></p>
       </div>
-      {posts.map((post) => (
-        <a class="post" data-cat={post.data.category} href={`/writings/${post.id}/`}>
-          <div class="visual">
-            {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />}
-          </div>
-          <div class="content">
-            <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.excerpt}</p>
-          </div>
-        </a>
-      ))}
-      <p><a class="back-link" href="/writings/">All writings →</a></p>
+
+      <aside id="map" class="map-column">
+        <div class="map-heading">
+          <div class="eyebrow">Knowledge Map</div>
+          <h2>Ideas should connect like ideas — not like folders.</h2>
+          <p>Use the map to move across writing, engineering topics, experiments and the connections between them.</p>
+        </div>
+        <div class="home-map">
+          <KnowledgeGraph posts={allPosts} />
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -90,14 +105,6 @@ const posts = allPosts.slice(0, 4);
     </div>
   </section>
 
-  <section id="map" class="section" style="background:#e9e4da">
-    <div class="wrap">
-      <div class="eyebrow">Knowledge Map</div>
-      <h2>Ideas should connect like ideas — not like folders.</h2>
-      <KnowledgeGraph posts={allPosts} />
-    </div>
-  </section>
-
   <section id="life" class="section">
     <div class="wrap">
       <div class="eyebrow">Life</div>
@@ -111,6 +118,31 @@ const posts = allPosts.slice(0, 4);
     </div>
   </section>
 </Base>
+
+<style>
+  .garden-dashboard{background:#f1ede4}
+  .garden-columns{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(360px,.82fr);gap:34px;align-items:start}
+  .latest-column,.map-column{min-width:0}
+  .map-column{position:sticky;top:92px}
+  .map-heading{margin-bottom:18px}
+  .map-heading h2{font-size:30px;margin:7px 0 10px;line-height:1.08}
+  .map-heading p{color:#6b6b6b;line-height:1.6;margin:0;max-width:520px}
+  .home-map :global(.map){height:620px;border-radius:24px}
+  .home-post{grid-template-columns:170px 1fr}
+  .home-post .visual{min-height:155px}
+  .home-post .content{padding:20px}
+  .home-post h3{font-size:22px}
+  .home-post p{font-size:14px;line-height:1.55}
+  @media(max-width:1050px){
+    .garden-columns{grid-template-columns:1fr}
+    .map-column{position:static}
+    .home-map :global(.map){height:500px}
+  }
+  @media(max-width:700px){
+    .home-post{grid-template-columns:1fr}
+    .home-map :global(.map){height:430px}
+  }
+</style>
 
 <script>
   const buttons = document.querySelectorAll('.filters button');
