@@ -7,24 +7,74 @@ const posts = (await getCollection('writings', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 ---
-<Base title="Writings — Maheswaran" description="Everything in the notebook so far — engineering notes, worked out in public.">
+<Base title="Writings — Maheswaran" description="Engineering, computation, experiments, reflections, books, films and journeys from the field notebook.">
   <section class="section" style="border-top:none">
     <div class="wrap">
       <div class="eyebrow">All entries</div>
-      <h2>Writings</h2>
+      <h2 id="writings-title">Writings</h2>
+      <p id="filter-status" class="filter-status" hidden></p>
       <p class="stage-legend">🌱 Seedling — a rough note or open question &nbsp;·&nbsp; 🌿 Budding — worked out, could still change &nbsp;·&nbsp; 🌳 Evergreen — revisited and holding up</p>
-      {posts.map((post) => (
-        <a class="post" href={`/writings/${post.id}/`}>
-          <div class="visual">
-            {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />}
-          </div>
-          <div class="content">
-            <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.excerpt}</p>
-          </div>
-        </a>
-      ))}
+      <div id="writing-list">
+        {posts.map((post) => {
+          const filterText = [
+            post.data.title,
+            post.data.category,
+            post.data.categoryLabel,
+            post.data.meta,
+            ...(post.data.tags ?? []),
+          ].filter(Boolean).join(' ').toLowerCase().replace(/[-–—_]+/g, ' ');
+          return (
+            <a class="post writing-entry" data-filter-text={filterText} href={`/writings/${post.id}/`}>
+              <div class="visual">
+                {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} loading="lazy" />}
+              </div>
+              <div class="content">
+                <div class="meta">{post.data.meta}<StageBadge stage={post.data.stage} /></div>
+                <h3>{post.data.title}</h3>
+                <p>{post.data.excerpt}</p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+      <div id="empty-filter" class="empty-filter" hidden>
+        <strong>No matching entries yet.</strong>
+        <p>This topic is part of the garden, but there is not a published writing under it yet.</p>
+        <a class="back-link" href="/writings/">Show all writings →</a>
+      </div>
     </div>
   </section>
 </Base>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const requestedTag = params.get('tag');
+  if (requestedTag) {
+    const normalize = (value) => value.toLowerCase().replace(/[-–—_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const needle = normalize(requestedTag);
+    const entries = Array.from(document.querySelectorAll('.writing-entry'));
+    let visible = 0;
+    entries.forEach((entry) => {
+      const haystack = normalize(entry.getAttribute('data-filter-text') ?? '');
+      const matches = haystack.includes(needle);
+      entry.style.display = matches ? 'grid' : 'none';
+      if (matches) visible += 1;
+    });
+
+    const title = document.querySelector('#writings-title');
+    const status = document.querySelector('#filter-status');
+    const empty = document.querySelector('#empty-filter');
+    if (title) title.textContent = requestedTag.replace(/-/g, ' ');
+    if (status) {
+      status.hidden = false;
+      status.textContent = `${visible} ${visible === 1 ? 'entry' : 'entries'} · filtered from Writings`;
+    }
+    if (empty) empty.hidden = visible > 0;
+  }
+</script>
+
+<style>
+  .filter-status{margin:-18px 0 22px;color:#777;font-size:14px}
+  .empty-filter{border:1px dashed #cfc6b8;border-radius:18px;background:#fff;padding:24px;margin-top:22px}
+  .empty-filter p{color:#666;line-height:1.6;margin:8px 0 14px}
+</style>
