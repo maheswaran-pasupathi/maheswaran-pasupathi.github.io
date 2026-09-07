@@ -14,13 +14,13 @@ const posts = allPosts.slice(0, 4);
     <div>
       <div class="eyebrow">Engineering field notebook + life archive</div>
       <h1>I build, learn, question — and document what stays.</h1>
-      <p>I'm Maheswaran, an engineer working across CFD, thermal-fluid sciences, combustion and AI-enabled engineering. This is where simulations, experiments, books, journeys and unfinished questions live together.</p>
+      <p>I'm Maheswaran, a thermal-fluid and CFD engineer exploring how heat, flow and physics shape engines, batteries, electric vehicles and complete vehicle systems — and how AI can make engineering faster, clearer and more useful. This is where simulations, experiments, books, journeys and unfinished questions live together.</p>
     </div>
     <aside class="card">
       <div class="eyebrow">Currently exploring</div>
       <div class="tags">
-        <span>Hydrogen combustion</span><span>Scientific ML</span><span>Modelica</span>
-        <span>Surrogate models</span><span>Battery thermal</span><span>First principles</span>
+        <span>Battery & EV thermal</span><span>Vehicle thermal & flow</span><span>Engine thermal & combustion</span>
+        <span>Scientific ML</span><span>Surrogate models</span><span>System simulation</span>
       </div>
       <p><em>Build → Learn → Understand → Document → Revisit.</em></p>
     </aside>
@@ -72,10 +72,10 @@ const posts = allPosts.slice(0, 4);
       <h2>The territories I keep returning to.</h2>
       <div class="grid">
         {[
-          { name: 'Engine', items: ['Combustion', 'Spray & ignition', 'Hydrogen–diesel', 'Methanol–diesel', 'CHT'] },
-          { name: 'Battery', items: ['Cell thermal', 'Pack cooling', 'Thermal runaway', 'Propagation', 'BESS cooling'] },
-          { name: 'Vehicle', items: ['Aerodynamics', 'Thermal management', 'HVAC', 'Cooling systems', 'Energy flow'] },
-          { name: 'AI + Physical Systems', items: ['DOE', 'Surrogates', 'Optimization', 'Scientific ML', 'AI agents'] },
+          { name: 'Engine & Powertrain', items: ['Thermal management', 'Combustion & CHT', 'Air-path & manifolds', 'Alternative fuels', 'System simulation'] },
+          { name: 'Battery & EV Thermal', items: ['Cell / pack thermal', 'Cooling architectures', 'Thermal runaway', 'E-drive & electronics', 'Electro-thermal systems'] },
+          { name: 'Vehicle & Flow', items: ['Aerodynamics', 'Vehicle thermal management', 'HVAC', 'Cooling airflow', 'Energy & heat flow'] },
+          { name: 'AI + Physical Systems', items: ['DOE', 'Surrogates', 'Optimization', 'Scientific ML', 'Automation & agents'] },
         ].map((topic) => {
           const img = explorationImages[topic.name];
           return (
