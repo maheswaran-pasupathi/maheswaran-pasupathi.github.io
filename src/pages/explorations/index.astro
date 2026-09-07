@@ -1,18 +1,45 @@
 ---
 import Base from '../../layouts/Base.astro';
 ---
-<Base title="Explorations — Maheswaran" description="The engineering territories I keep returning to — engine, battery, vehicle, and AI for physical systems.">
+<Base title="Explorations — Maheswaran" description="Explorations across thermal-fluid engineering, engines and powertrain, battery and EV thermal systems, vehicle flow, system simulation, and AI for physical systems.">
   <section class="section" style="border-top:none">
     <div class="wrap">
       <div class="eyebrow">Explorations</div>
       <h2>The territories I keep returning to.</h2>
-      <div class="grid">
-        <div class="topic"><h3>Engine</h3><ul><li>Combustion</li><li>Spray & ignition</li><li>Hydrogen–diesel</li><li>Methanol–diesel</li><li>CHT</li></ul></div>
-        <div class="topic"><h3>Battery</h3><ul><li>Cell thermal</li><li>Pack cooling</li><li>Thermal runaway</li><li>Propagation</li><li>BESS cooling</li></ul></div>
-        <div class="topic"><h3>Vehicle</h3><ul><li>Aerodynamics</li><li>Thermal management</li><li>HVAC</li><li>Cooling systems</li><li>Energy flow</li></ul></div>
-        <div class="topic"><h3>AI + Physical Systems</h3><ul><li>DOE</li><li>Surrogates</li><li>Optimization</li><li>Scientific ML</li><li>AI agents</li></ul></div>
+      <p class="explore-intro">These are broad engineering territories rather than fixed labels. They connect through heat transfer, fluid flow, simulation, systems thinking and computation.</p>
+      <div class="grid exploration-grid">
+        <div class="topic"><h3>Engine & Powertrain</h3><ul><li>Thermal management</li><li>Combustion & CHT</li><li>Air-path & manifolds</li><li>Alternative fuels</li><li>System simulation</li></ul></div>
+        <div class="topic"><h3>Battery & EV Thermal</h3><ul><li>Cell / pack thermal</li><li>Cooling architectures</li><li>Thermal runaway</li><li>E-drive & electronics</li><li>Electro-thermal systems</li></ul></div>
+        <div class="topic"><h3>Vehicle & Flow</h3><ul><li>Aerodynamics</li><li>Vehicle thermal management</li><li>HVAC</li><li>Cooling airflow</li><li>Energy & heat flow</li></ul></div>
+        <div class="topic"><h3>AI + Physical Systems</h3><ul><li>DOE</li><li>Surrogates & ROM</li><li>Optimization</li><li>Scientific ML</li><li>Automation & agents</li></ul></div>
       </div>
-      <p style="margin-top:20px"><a class="back-link" href="/">← Home</a></p>
+    </div>
+  </section>
+
+  <section id="workbench" class="section workbench-section">
+    <div class="wrap">
+      <div class="eyebrow">Workbench</div>
+      <h2>Things I am building, testing and learning through.</h2>
+      <p class="explore-intro">The Workbench is for active engineering work that is not yet a polished article: simulations, data studies, small tools, model experiments, validation exercises and unfinished builds.</p>
+      <div class="workbench-grid">
+        <div class="card"><h3>Simulation studies</h3><p>Lean models, fidelity studies, validation exercises and engineering questions explored through CFD or system simulation.</p></div>
+        <div class="card"><h3>Data & AI experiments</h3><p>DOE, surrogate modelling, uncertainty, scientific ML and data-driven engineering experiments.</p></div>
+        <div class="card"><h3>Tools & automation</h3><p>Automation scripts, result pipelines, engineering assistants and workflow experiments.</p></div>
+      </div>
+      <p class="workbench-note">As individual projects mature, they can move from the Workbench into their own dedicated pages without changing the high-level navigation.</p>
+      <p style="margin-top:24px"><a class="back-link" href="/">← Home</a></p>
     </div>
   </section>
 </Base>
+
+<style>
+  .explore-intro{max-width:820px;color:#666;font-size:17px;line-height:1.7;margin:-12px 0 30px}
+  .exploration-grid{align-items:stretch}
+  .workbench-section{background:#f0ebe1}
+  .workbench-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .workbench-grid .card{background:#fff}
+  .workbench-grid h3{margin-top:0}
+  .workbench-grid p,.workbench-note{color:#666;line-height:1.65}
+  .workbench-note{max-width:820px;margin-top:22px}
+  @media(max-width:850px){.workbench-grid{grid-template-columns:1fr}}
+</style>
