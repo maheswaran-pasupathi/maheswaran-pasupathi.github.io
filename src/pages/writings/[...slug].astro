@@ -7,8 +7,8 @@ const {post}=Astro.props;const {Content,headings}=await render(post);const pageU
 const linkedinShare=`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
 const authorEmail='maheswaran.codes@gmail.com';
 const emailAuthor=`mailto:${authorEmail}?subject=${encodeURIComponent(`Thoughts on: ${post.data.title}`)}&body=${encodeURIComponent(`Hi Maheswaran,\n\nI read your article:\n${pageUrl}\n\nMy thoughts:\n`)}`;
-const giscusCategoryId=import.meta.env.PUBLIC_GISCUS_CATEGORY_ID ?? '';
-const commentsConfigured=Boolean(giscusCategoryId);
+const giscusCategoryId='DIC_kwDOSfVP6M4DFDTL';
+const commentsConfigured=true;
 ---
 <Base title={`${post.data.title} — Maheswaran`} description={post.data.excerpt} type="article" image={post.data.cover}>
 <article class="wrap prose"><p><a class="back-link" href="/writings/">← All writings</a></p><div class="eyebrow">{post.data.meta}<StageBadge stage={post.data.stage}/></div><h1>{post.data.title}</h1>
@@ -16,13 +16,13 @@ const commentsConfigured=Boolean(giscusCategoryId);
 {headings.length>1&&<details class="article-toc"><summary>In this reflection <span>{headings.filter(h=>h.depth===2).length} sections</span></summary><nav aria-label="Article sections">{headings.filter(h=>h.depth===2).map(h=><a href={`#${h.slug}`}>{h.text}</a>)}</nav></details>}
 {post.data.cover&&<figure class="post-cover"><img src={post.data.cover} alt={post.data.coverAlt??''}/>{post.data.coverCredit&&<figcaption>{post.data.coverCreditUrl?<a href={post.data.coverCreditUrl}>{post.data.coverCredit}</a>:post.data.coverCredit}</figcaption>}</figure>}
 <Content/>
-<aside class="discuss" aria-label="Discuss and share this article"><div class="eyebrow">Continue the conversation</div><h2>What did this leave you thinking about?</h2><p>I write these notes to start conversations, not end them. If something here connects with your experience — or you see it differently — I would like to hear your perspective.</p><div class="discussion-actions"><button class="action primary" id="open-comments" type="button">💬 Comments & reactions</button><a class="action" href={linkedinShare} target="_blank" rel="noopener noreferrer">↗ Share on LinkedIn</a><a class="action" href={emailAuthor}>✉ Email Maheswaran</a><button class="action" id="copy-link" type="button">⧉ Copy article link</button></div><p class="contact-note">Comments are designed to open here on the article itself — not as GitHub Issues. Previous comments and reactions will appear together in the popup once the discussion backend is enabled.</p></aside>
+<aside class="discuss" aria-label="Discuss and share this article"><div class="eyebrow">Continue the conversation</div><h2>What did this leave you thinking about?</h2><p>I write these notes to start conversations, not end them. If something here connects with your experience — or you see it differently — I would like to hear your perspective.</p><div class="discussion-actions"><button class="action primary" id="open-comments" type="button">💬 Comments & reactions</button><a class="action" href={linkedinShare} target="_blank" rel="noopener noreferrer">↗ Share on LinkedIn</a><a class="action" href={emailAuthor}>✉ Email Maheswaran</a><button class="action" id="copy-link" type="button">⧉ Copy article link</button></div><p class="contact-note">Comments open here on the article itself. Previous comments, replies and reactions stay connected to this page through GitHub Discussions.</p></aside>
 <p style="margin-top:42px"><a class="back-link" href="/writings/">← All writings</a></p></article>
 
 <dialog id="comments-dialog" class="comments-dialog" aria-labelledby="comments-title">
   <div class="comments-shell">
     <div class="comments-head"><div><div class="eyebrow">Conversation</div><h2 id="comments-title">Comments & reactions</h2></div><button id="close-comments" class="comments-close" type="button" aria-label="Close comments">×</button></div>
-    <p class="comments-intro">Read previous comments, add your perspective, or react to the discussion. Comments stay connected to this article.</p>
+    <p class="comments-intro">Read previous comments, add your perspective, reply to others, or react to the discussion. Comments stay connected to this article.</p>
     {commentsConfigured ? (
       <div class="giscus"></div>
     ) : (
@@ -40,11 +40,11 @@ const commentsConfigured=Boolean(giscusCategoryId);
     s.setAttribute('data-category','General');
     s.setAttribute('data-category-id',giscusCategoryId);
     s.setAttribute('data-mapping','pathname');
-    s.setAttribute('data-strict','1');
+    s.setAttribute('data-strict','0');
     s.setAttribute('data-reactions-enabled','1');
     s.setAttribute('data-emit-metadata','0');
-    s.setAttribute('data-input-position','top');
-    s.setAttribute('data-theme','light');
+    s.setAttribute('data-input-position','bottom');
+    s.setAttribute('data-theme','preferred_color_scheme');
     s.setAttribute('data-lang','en');
     s.setAttribute('data-loading','lazy');
     s.setAttribute('crossorigin','anonymous');
