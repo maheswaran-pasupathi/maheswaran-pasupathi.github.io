@@ -1,6 +1,6 @@
 ---
 interface Props { title?:string; description?:string; type?:'website'|'article'; image?:string; }
-const { title='Maheswaran — Engineering Field Notebook', description='An engineering field notebook and life archive — CFD, thermal-fluid sciences, combustion and AI-enabled engineering, worked out in public.', type='website', image }=Astro.props;
+const { title='Maheswaran — Engineering Field Notebook', description='An engineering field notebook and life archive exploring CFD, thermal-fluid engineering, engines and powertrain, batteries and electric vehicles, vehicle thermal and flow systems, system simulation, and AI-enabled engineering.', type='website', image }=Astro.props;
 const canonical=new URL(Astro.url.pathname,Astro.site);const ogImage=image?new URL(image,Astro.site):undefined;
 ---
 <!doctype html><html lang="en"><head>
