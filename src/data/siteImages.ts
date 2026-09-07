@@ -20,8 +20,8 @@ export const heroImage: SiteImage | null = {
 };
 
 export const explorationImages: Record<string, SiteImage | null> = {
-  Engine: null,
-  Battery: null,
-  Vehicle: null,
+  'Engine & Powertrain': null,
+  'Battery & EV Thermal': null,
+  'Vehicle & Flow': null,
   'AI + Physical Systems': null,
 };
